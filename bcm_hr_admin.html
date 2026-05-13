@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BCM Appraisal Portal — HR Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--y:#FCB900;--yl:#FFF8E1;--dark:#101018;--bg:#F7F7F5;--w:#fff;--bd:#E2E2DC;--tx:#1A1A18;--mt:#6B6B67;--ok:#16A34A;--er:#DC2626;--info:#2563EB;--f:system-ui,-apple-system,sans-serif}
+body{font-family:var(--f);background:var(--bg);min-height:100vh}
+.scr{display:none}.scr.on{display:block}
+
+/* ── HEADER (single bar) ── */
+.hdr{background:var(--dark);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:300;gap:8px}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer;flex-shrink:0}
+.logo-text{color:#fff;font-size:13px;font-weight:800;letter-spacing:.6px;line-height:1.25;text-transform:uppercase}
+/* Inline nav tabs in header */
+.hdr-nav{display:flex;align-items:center;gap:2px;flex:1;margin:0 16px}
+.hdr-tab{padding:6px 12px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap;border:none;background:transparent;font-family:var(--f)}
+.hdr-tab:hover{color:#fff;background:rgba(255,255,255,.08)}
+.hdr-tab.on{color:#fff;background:rgba(255,255,255,.12);font-weight:700}
+.hdr-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.cy-pill{border:1.5px solid var(--y);color:var(--y);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;white-space:nowrap}
+/* Import button */
+.hdr-btn{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.8);font-family:var(--f);transition:all .15s}
+.hdr-btn:hover{border-color:var(--y);color:var(--y)}
+.hdr-btn-add{background:var(--y);color:var(--dark);border-color:var(--y)}
+.hdr-btn-add:hover{background:#e8a900;border-color:#e8a900;color:var(--dark)}
+/* Avatar dropdown */
+.av-rel{position:relative}
+.av-pill{display:flex;align-items:center;gap:8px;border:1.5px solid rgba(255,255,255,.25);border-radius:20px;padding:4px 12px 4px 6px;cursor:pointer;transition:background .15s;user-select:none}
+.av-pill:hover{background:rgba(255,255,255,.1)}
+.avt{width:24px;height:24px;border-radius:50%;background:var(--y);color:var(--dark);font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.av-name{color:rgba(255,255,255,.85);font-size:12px;font-weight:500}
+.av-caret{color:rgba(255,255,255,.5);font-size:10px}
+.nav-drop{position:absolute;right:0;top:calc(100% + 10px);background:var(--w);border:1px solid var(--bd);border-radius:10px;min-width:180px;z-index:400;box-shadow:0 6px 24px rgba(0,0,0,.14);overflow:hidden;display:none}
+.nav-drop.open{display:block}
+.nav-drop-item{padding:12px 16px;font-size:13px;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.nav-drop-item:hover{background:var(--bg)}
+.nav-drop-item.active-role{font-weight:700}
+.nav-drop-divider{height:1px;background:var(--bd)}
+.nav-drop-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* ── OWN APPRAISAL MODE ── */
+.appr-tabs{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.07);border-radius:8px;padding:3px;position:absolute;left:50%;transform:translateX(-50%)}
+.appr-tab{padding:5px 16px;border-radius:6px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);cursor:pointer;border:none;background:transparent;font-family:var(--f);transition:all .15s;white-space:nowrap}
+.appr-tab:hover{color:#fff}
+.appr-tab.on{background:var(--w);color:var(--dark);font-weight:700}
+/* ── STEPPER ── */
+.stepper-bar{background:var(--w);border-bottom:1px solid var(--bd);padding:0 24px}
+.stepper-inner{display:flex;max-width:900px;margin:0 auto}
+.step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;cursor:pointer;padding-bottom:10px}
+.step:not(:last-child)::after{content:'';position:absolute;top:13px;left:50%;width:100%;height:2px;background:var(--bd);z-index:0}
+.step.active:not(:last-child)::after{background:var(--y)}
+.step-dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--bd);background:var(--w);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--mt);z-index:1;transition:all .2s;margin-top:10px}
+.step.active .step-dot{background:var(--y);border-color:var(--y);color:var(--dark)}
+.step.locked .step-dot{background:#F0F0EE;border-color:var(--bd);color:#bbb}
+.step-lbl{font-size:9px;color:var(--mt);margin-top:5px;text-align:center;font-weight:500;line-height:1.3;max-width:68px}
+.step.active .step-lbl{color:var(--tx);font-weight:700}
+/* ── WRAP ── */
+.appr-wrap{max-width:900px;margin:0 auto;padding:28px 24px}
+/* ── FORM FOOTER ── */
+.appr-ff{display:flex;align-items:center;justify-content:space-between;padding:20px 0;margin-top:8px;border-top:1px solid var(--bd)}
+/* ── OBJECTIVE CARDS ── */
+.obj-card{background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.obj-hdr{background:var(--dark);padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.obj-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.4)}
+.obj-title{font-size:13px;font-weight:600;color:#fff;margin-left:8px;flex:1}
+.obj-wt-pill{font-size:11px;font-weight:800;color:var(--y);background:rgba(252,185,0,.15);border-radius:20px;padding:3px 12px;white-space:nowrap;flex-shrink:0}
+.kpi-hdr{display:grid;gap:0;padding:8px 18px;background:#FAFAF8;border-bottom:1px solid var(--bd)}
+.kh{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)}
+.kpi-row{display:grid;gap:0;padding:14px 18px;border-bottom:1px solid var(--bd);align-items:center}
+.kpi-row.last{border-bottom:none}
+.kn{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:2px}
+.kw{font-size:12px;font-weight:700;color:var(--mt);text-align:center}
+.kt{font-size:12px;color:var(--mt);text-align:center}
+.ki input{width:80px;border:1.5px solid var(--bd);border-radius:6px;padding:6px 8px;font-size:13px;text-align:center;outline:none;font-family:var(--f)}
+.ki input:focus{border-color:var(--y)}
+.kpct{font-size:12px;color:var(--mt);text-align:center}
+.kpct.v{color:var(--ok);font-weight:700}
+.gtag{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:12px;font-weight:700}
+.gA{background:#DCFCE7;color:#15803D}.gB{background:#DBEAFE;color:#1D4ED8}.gC{background:#FEF9C3;color:#CA8A04}.gD{background:#FEE2E2;color:#DC2626}.gN{background:#F0F0EE;color:var(--mt)}
+.kpi-cmt{padding:8px 18px 12px;border-top:1px solid var(--bd);background:#FAFAF8}
+.kpi-cmt label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);display:block;margin-bottom:5px}
+.kpi-cmt textarea{width:100%;border:1.5px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:12px;resize:none;height:44px;outline:none;font-family:var(--f);color:var(--tx)}
+.kpi-cmt textarea:focus{border-color:var(--y)}
+/* ── DELIVERABLE KPI ── */
+.del-type-badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;background:#EFF6FF;color:#1D4ED8;margin-top:4px}
+.del-kpi-row{border-bottom:1px solid var(--bd)}.del-kpi-row:last-child{border-bottom:none}
+.del-kpi-hdr{display:flex;align-items:flex-start;justify-content:space-between;padding:13px 18px 10px;gap:12px}
+.del-kpi-body{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--bd)}
+.del-kpi-target{padding:13px 18px;border-right:1px solid var(--bd);background:#FAFAF8}
+.del-kpi-actual{padding:13px 18px;background:var(--w)}
+.del-field-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin-bottom:6px}
+.del-target-txt{font-size:13px;color:var(--tx);line-height:1.65;font-style:italic}
+.del-actual-ta{width:100%;border:1.5px solid var(--bd);border-radius:6px;padding:8px 11px;font-size:13px;resize:none;height:80px;outline:none;font-family:var(--f);color:var(--tx);line-height:1.5}
+.del-actual-ta:focus{border-color:var(--y)}
+.del-kpi-footer{display:flex;align-items:center;gap:16px;padding:11px 18px;border-top:1px solid var(--bd);background:#FAFAF8}
+.del-sel-wrap{position:relative;flex:1;max-width:280px}
+.del-completion-sel{width:100%;appearance:none;border:1.5px solid var(--bd);border-radius:7px;padding:8px 34px 8px 13px;font-size:13px;color:var(--tx);background:var(--w);outline:none;cursor:pointer;font-family:var(--f)}
+.del-completion-sel:focus{border-color:var(--y)}
+.del-sel-caret{position:absolute;right:11px;top:50%;transform:translateY(-50%);pointer-events:none;font-size:11px;color:var(--mt)}
+/* ── V&B ── */
+.vb-card{background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:18px;margin-bottom:10px}
+.vb-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.vb-name{font-size:14px;font-weight:700;color:var(--tx);margin-bottom:3px}
+.vb-desc{font-size:12px;color:var(--mt);line-height:1.5}
+.vb-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700}
+.vbp-n{background:#F0F0EE;color:var(--mt)}
+.vbp-1{background:#FEE2E2;color:#DC2626}.vbp-2{background:#FEF9C3;color:#CA8A04}
+.vbp-3{background:#DBEAFE;color:#1D4ED8}.vbp-4{background:#DCFCE7;color:#15803D}.vbp-5{background:#F3E8FF;color:#7E22CE}
+.r-row{display:flex;gap:6px;flex-wrap:wrap}
+.r-btn{border:1.5px solid var(--bd);border-radius:8px;padding:8px 10px;background:var(--w);cursor:pointer;text-align:center;transition:all .15s;font-family:var(--f);min-width:72px}
+.r-btn:hover{border-color:var(--y);background:var(--yl)}
+.r-btn.sel{border-color:var(--dark);background:var(--dark)}
+.r-btn.sel .r-lbl,.r-btn.sel .r-sc{color:#fff}
+.r-lbl{font-size:10px;font-weight:600;color:var(--mt);display:block;line-height:1.3}
+.r-sc{font-size:13px;font-weight:700;color:var(--tx);display:block;margin-top:3px}
+/* ── LEARNING ── */
+.lrn-hdr{display:grid;grid-template-columns:1fr 1fr 1fr 32px;gap:0;padding:8px 18px;background:#FAFAF8;border-bottom:1px solid var(--bd);border-top:1px solid var(--bd)}
+.lrn-row{display:grid;grid-template-columns:1fr 1fr 1fr 32px;gap:8px;padding:12px 18px;border-bottom:1px solid var(--bd);align-items:center}
+.lrn-inp{width:100%;border:1.5px solid var(--bd);border-radius:6px;padding:7px 10px;font-size:12px;outline:none;font-family:var(--f);color:var(--tx)}
+.lrn-inp:focus{border-color:var(--y)}
+.lrn-rm{width:26px;height:26px;border-radius:6px;border:1px solid var(--bd);background:var(--w);cursor:pointer;color:var(--mt);font-size:14px}
+.lrn-rm:hover{background:#FEF2F2;border-color:var(--er);color:var(--er)}
+/* ── MODALS & ENTRY TABS ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;display:flex;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.hidden{display:none !important}
+.entry-modal{background:var(--w);border-radius:14px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.22)}
+.entry-modal-hdr{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.entry-modal-hdr h2{font-size:17px;font-weight:700;color:var(--tx)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--w);cursor:pointer;font-size:16px;color:var(--mt);display:flex;align-items:center;justify-content:center}
+.modal-close:hover{background:var(--bg)}
+.entry-modal-body{padding:20px 24px}
+.entry-modal-footer{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+.entry-type-tabs{display:grid;gap:8px;margin-bottom:18px}
+.et-tab{border:1.5px solid var(--bd);border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all .15s;background:var(--w)}
+.et-tab:hover{border-color:var(--y);background:var(--yl)}
+.et-tab.on{border-color:var(--dark);background:var(--dark)}
+.et-tab.on .et-lbl{color:#fff}
+.et-icon{font-size:20px;display:block;margin-bottom:4px}
+.et-lbl{font-size:12px;font-weight:600;color:var(--tx);display:block}
+.ef{margin-bottom:14px}
+.ef label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin-bottom:5px}
+.ef input,.ef select,.ef textarea{width:100%;border:1.5px solid var(--bd);border-radius:7px;padding:9px 13px;font-size:13px;color:var(--tx);outline:none;font-family:var(--f);background:var(--w)}
+.ef input:focus,.ef select:focus{border-color:var(--y)}
+/* ── LOGBOOK ── */
+.lb-entry{background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:16px 18px;margin-bottom:10px}
+.lb-type-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.lb-work{background:#EFF6FF;color:#1D4ED8}.lb-win{background:#F0FDF4;color:#15803D}
+.lb-learn{background:var(--yl);color:#7B5800}.lb-team{background:#F3E8FF;color:#7E22CE}
+/* ── SUMMARY TABLE ── */
+.sum-table{width:100%;border-collapse:collapse;background:var(--w);border-radius:10px;overflow:hidden;border:1px solid var(--bd)}
+.sum-table th{padding:11px 16px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);background:#FAFAF8;text-align:left;border-bottom:1px solid var(--bd)}
+.sum-table td{padding:13px 16px;font-size:13px;color:var(--tx);border-bottom:1px solid var(--bd)}
+.sum-table tr:last-child td{border-bottom:none}
+/* ── SUBMIT WARNING MODAL ── */
+.warn-modal{background:var(--w);border-radius:14px;width:100%;max-width:440px;padding:32px 28px;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.22)}
+.add-drop{position:absolute;right:0;top:calc(100% + 10px);background:var(--w);border:1px solid var(--bd);border-radius:10px;min-width:200px;z-index:400;box-shadow:0 6px 24px rgba(0,0,0,.14);overflow:hidden;display:none}
+.add-drop.open{display:block}
+.add-drop-item{padding:13px 18px;font-size:13px;color:var(--tx);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.add-drop-item:hover{background:var(--bg)}
+.add-drop-item-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* ── LOGIN ── */
+.login-shell{background:#E8E8E6;min-height:100vh;display:flex;flex-direction:column}
+.login-hdr{background:#1A1A1A;padding:13px 28px;display:flex;align-items:center;justify-content:space-between}
+.login-tag{height:40px;display:flex;align-items:center;padding:0 28px;font-size:10px;font-weight:700;letter-spacing:1.4px;color:#888;text-transform:uppercase}
+.login-panel{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+.card{background:var(--w);border-radius:12px;width:100%;max-width:320px;padding:36px 30px;text-align:center;box-shadow:0 2px 28px rgba(0,0,0,.1)}
+.card h1{font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px;margin-bottom:8px}
+.card-sub{font-size:13px;color:#888;line-height:1.65;margin-bottom:22px}
+.fld{text-align:left;margin-bottom:14px}
+.fld label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:5px}
+.fld label span{color:var(--y)}
+.fld input{width:100%;border:1.5px solid #D5D5D5;border-radius:7px;padding:10px 13px;font-size:14px;color:var(--tx);outline:none;font-family:var(--f);transition:border .15s;background:#FAFAFA}
+.fld input:focus{border-color:var(--y);background:#fff}
+.fld input.err{border-color:var(--er)}
+.err-txt{font-size:11px;color:var(--er);margin-top:4px;display:none}.err-txt.on{display:block}
+.cta-btn{width:100%;border:none;border-radius:7px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--f);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.cta-disabled{background:#E8E8E4;color:#bbb;cursor:not-allowed}
+.cta-ready{background:var(--y);color:var(--dark)}.cta-ready:hover{background:#e8a900}
+.cta-sending{background:#EEEEE8;color:#aaa;cursor:not-allowed}
+.cta-open{background:var(--y);color:var(--dark)}
+.spin{width:13px;height:13px;border:2px solid #bbb;border-top-color:#777;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.help-txt{font-size:12px;color:#aaa;margin-top:14px}
+.help-txt a{color:var(--y);text-decoration:none;font-weight:500}
+.email-icon-ring{width:54px;height:54px;border-radius:50%;background:var(--yl);border:2px solid var(--y);display:flex;align-items:center;justify-content:center;margin:0 auto 18px}
+
+/* ── LAYOUT ── */
+.wrap{max-width:1080px;margin:0 auto;padding:26px 24px}
+.btn{border:none;padding:9px 20px;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--f);transition:all .15s}
+.btn-p{background:var(--y);color:var(--dark)}.btn-p:hover{background:#e8a900}
+.btn-s{background:var(--w);color:var(--tx);border:1px solid var(--bd)}.btn-s:hover{background:var(--bg)}
+.btn-ok{background:var(--ok);color:#fff}.btn-ok:hover{background:#15803d}
+.btn-full{width:100%}.btn-sm{padding:6px 13px;font-size:12px}
+
+/* ── STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.stat{background:var(--w);border:1px solid var(--bd);border-radius:9px;padding:14px 16px}
+.stat-v{font-size:28px;font-weight:700;color:var(--tx)}
+.stat-l{font-size:11px;color:var(--mt);margin-top:3px}
+.stat.ok .stat-v{color:var(--ok)}.stat.amber .stat-v{color:#D97706}.stat.red .stat-v{color:var(--er)}
+
+/* ── TABLE ── */
+.dtable{background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden;overflow-x:auto}
+.dt-hdr{display:grid;grid-template-columns:28px 200px 120px 130px 80px 80px 80px 80px 70px;gap:0;padding:10px 16px;background:#FAFAF8;border-bottom:1px solid var(--bd);min-width:900px}
+.dth{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mt)}
+.dt-row{display:grid;grid-template-columns:28px 200px 120px 130px 80px 80px 80px 80px 70px;gap:0;padding:12px 16px;border-bottom:1px solid var(--bd);align-items:center;transition:background .1s;min-width:900px}
+.dt-row:last-child{border-bottom:none}
+.dt-row:hover{background:#FAFAFA}
+.dt-row.sel{background:var(--yl)}
+.emp-name{font-size:13px;font-weight:500;color:var(--tx)}
+.emp-dept{font-size:11px;color:var(--mt);margin-top:1px}
+.emp-mgr{font-size:12px;color:var(--mt)}
+.sp{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;white-space:nowrap}
+.sp-p{background:#F5F5F0;color:var(--mt)}.sp-o{background:var(--yl);color:#7B5800}.sp-d{background:#F0FDF4;color:var(--ok)}.sp-e{background:#FEF2F2;color:var(--er)}
+.chk{width:14px;height:14px;accent-color:var(--dark);cursor:pointer}
+.nudge-bar{background:var(--dark);border-radius:8px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nudge-bar p{color:rgba(255,255,255,.8);font-size:13px}
+.gd{font-size:12px;font-weight:700;width:24px;height:24px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center}
+.gdA{background:#F0FDF4;color:var(--ok)}.gdB{background:#EFF6FF;color:var(--info)}.gdC{background:#FFFBEB;color:#D97706}.gdD{background:#FEF2F2;color:var(--er)}.gdn{background:#F5F5F0;color:var(--mt)}
+
+/* ── FILTER ── */
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.fsel{border:1px solid var(--bd);border-radius:7px;padding:7px 11px;font-size:12px;color:var(--tx);background:var(--w);outline:none;cursor:pointer;font-family:var(--f)}
+.fsel:focus{border-color:var(--y)}
+.srch{flex:1;min-width:160px;border:1px solid var(--bd);border-radius:7px;padding:7px 13px;font-size:12px;color:var(--tx);background:var(--w);outline:none;font-family:var(--f)}
+.srch:focus{border-color:var(--y)}
+
+/* ── TOP ROW ── */
+.top-row{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:16px;flex-wrap:wrap}
+.top-left h1{font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px}
+.top-left p{font-size:12px;color:var(--mt);margin-top:3px}
+
+/* ── FORM FIELDS ── */
+.form-sec{background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:14px}
+.form-sec h3{font-size:13px;font-weight:700;color:var(--tx);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bd)}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.field label .req{color:var(--er)}
+.field input,.field select,.field textarea{width:100%;border:1.5px solid var(--bd);border-radius:7px;padding:9px 13px;font-size:14px;color:var(--tx);outline:none;font-family:var(--f);background:var(--w)}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--y)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+.phase-config{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.pc-item{background:#FAFAF8;border:1px solid var(--bd);border-radius:7px;padding:11px}
+.pc-item label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mt);display:block;margin-bottom:5px}
+.pc-item input{width:100%;border:1px solid var(--bd);border-radius:5px;padding:6px 9px;font-size:12px;outline:none;font-family:var(--f)}
+.pc-item input:focus{border-color:var(--y)}
+.elig-info{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:7px;padding:11px 14px;font-size:13px;color:var(--ok);margin-top:10px}
+.ff{display:flex;justify-content:space-between;align-items:center;padding-top:16px;border-top:1px solid var(--bd);margin-top:4px}
+.fa{display:flex;gap:8px}
+
+/* Cycle selector cards */
+.cycle-sel-card{background:var(--w);border:2px solid var(--bd);border-radius:10px;padding:14px 16px;cursor:pointer;transition:all .15s}
+.cycle-sel-card:hover{border-color:var(--y)}
+.cycle-sel-card.active{border-color:var(--dark);background:var(--dark)}
+.cycle-sel-card.active .cscard-period{color:#fff}
+.cycle-sel-card.active .cscard-dur{color:var(--y)}
+.cycle-sel-card.active .cscard-count{color:rgba(255,255,255,.5)}
+.cscard-period{font-size:17px;font-weight:800;color:var(--tx);margin-bottom:4px}
+.cscard-dur{font-size:12px;color:var(--mt);margin-bottom:4px}
+.cscard-count{font-size:11px;color:var(--mt)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bd)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-lbl{font-size:13px;color:var(--tx)}.toggle-sub{font-size:11px;color:var(--mt);margin-top:2px}
+.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#ddd;border-radius:22px;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--ok)}
+.toggle input:checked+.toggle-slider:before{transform:translateX(18px)}
+
+/* ── BROADSHEET ── */
+.bs-preview{background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.bs-hdr{padding:14px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.bs-hdr-t{font-size:14px;font-weight:700;color:var(--tx)}
+.bs-table{overflow-x:auto}
+.bs-table table{width:100%;border-collapse:collapse;font-size:12px}
+.bs-table th{background:#FAFAF8;padding:9px 13px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--mt);text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap}
+.bs-table td{padding:10px 13px;border-bottom:1px solid var(--bd);color:var(--tx);white-space:nowrap}
+.bs-table tr:last-child td{border-bottom:none}
+.bs-table tr:hover td{background:#FAFAFA}
+
+/* ── NOTIFICATIONS ── */
+.notif-card{background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden;margin-bottom:10px}
+.notif-row{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--bd)}
+.notif-row:last-child{border-bottom:none}
+.notif-title{font-size:13px;font-weight:500;color:var(--tx)}
+.notif-sub{font-size:11px;color:var(--mt);margin-top:2px}
+.notif-badge{font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;white-space:nowrap}
+.nb-auto{background:#F0FDF4;color:var(--ok)}.nb-man{background:var(--yl);color:#7B5800}
+
+/* ── IMPORT MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:var(--w);border-radius:12px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)}
+.modal-hdr{padding:20px 24px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
+.modal-hdr h2{font-size:17px;font-weight:700;color:var(--tx)}
+.modal-close{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--w);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--mt)}
+.modal-close:hover{background:var(--bg)}
+.modal-body{padding:20px 24px}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--bd);display:flex;gap:8px;justify-content:flex-end}
+
+/* Upload zone */
+.upload-zone{border:2px dashed var(--bd);border-radius:10px;padding:32px 20px;text-align:center;cursor:pointer;transition:all .15s}
+.upload-zone:hover{border-color:var(--y);background:var(--yl)}
+.upload-zone.drag{border-color:var(--y);background:var(--yl)}
+.upload-icon{font-size:36px;margin-bottom:10px}
+.upload-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:4px}
+.upload-sub{font-size:12px;color:var(--mt)}
+.upload-hint{font-size:11px;color:var(--mt);margin-top:12px;background:#F5F5F2;border-radius:6px;padding:8px 12px;text-align:left}
+
+/* Admin badge */
+.admin-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.admin-yes{background:#EFF6FF;color:var(--info)}
+.admin-no{background:#F5F5F0;color:var(--mt)}
+</style>
+</head>
+<body>
+
+<!-- ════ LOGIN HEADER ════ -->
+<div id="loginHdr">
+  <div class="login-hdr">
+    <div class="logo">
+      <svg width="32" height="32" viewBox="0 0 100 100" fill="none"><path d="M28 6 L72 6 L94 28 L94 72 L72 94 L28 94 L6 72 L6 28 Z" stroke="white" stroke-width="5" fill="none"/><path d="M50 18 L76 34 L76 66 L50 82 L24 66 L24 34 Z" stroke="white" stroke-width="4" fill="none"/></svg>
+      <div class="logo-text">BIG CABAL<br>MEDIA</div>
+    </div>
+    <div class="cy-pill">H1 2026 Cycle · Jan–June</div>
+  </div>
+</div>
+
+<!-- ════ APP HEADER — single bar with nav, role switcher, actions ════ -->
+<div id="appHdr" style="display:none">
+  <div class="hdr" style="position:relative">
+    <!-- Logo -->
+    <div class="logo" onclick="showTab('dash')">
+      <svg width="26" height="26" viewBox="0 0 100 100" fill="none"><path d="M28 6 L72 6 L94 28 L94 72 L72 94 L28 94 L6 72 L6 28 Z" stroke="white" stroke-width="5" fill="none"/><path d="M50 18 L76 34 L76 66 L50 82 L24 66 L24 34 Z" stroke="white" stroke-width="4" fill="none"/></svg>
+      <div class="logo-text">BIG CABAL<br>MEDIA</div>
+    </div>
+    <!-- HR nav tabs (hidden in appraisal mode) -->
+    <div class="hdr-nav" id="hrNav">
+      <button class="hdr-tab on" id="ht-dash" onclick="showTab('dash')">Dashboard</button>
+      <button class="hdr-tab" id="ht-cycle" onclick="showTab('cycle')">Create Cycle</button>
+      <button class="hdr-tab" id="ht-export" onclick="showTab('export')">Broadsheet Export</button>
+      <button class="hdr-tab" id="ht-notif" onclick="showTab('notif')">Notifications</button>
+    </div>
+    <!-- Right actions -->
+    <div class="hdr-right">
+      <div class="cy-pill">H1 2026 · Jan–Jun</div>
+      <!-- Import button -->
+      <button class="hdr-btn" onclick="openImport()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Import
+      </button>
+      <!-- Add member dropdown -->
+      <div class="av-rel" id="addRel">
+        <button class="hdr-btn hdr-btn-add" onclick="toggleAddDrop(event)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add
+        </button>
+        <div class="add-drop" id="addDrop">
+          <div class="add-drop-item" onclick="openOnboard('employee')"><div class="add-drop-item-icon" style="background:#EFF6FF">👤</div><div><div style="font-size:13px;font-weight:600;color:var(--tx)">Add Employee</div><div style="font-size:11px;color:var(--mt)">Onboard a new team member</div></div></div>
+          <div class="add-drop-item" onclick="openOnboard('admin')"><div class="add-drop-item-icon" style="background:#F0FDF4">🔐</div><div><div style="font-size:13px;font-weight:600;color:var(--tx)">Add Admin</div><div style="font-size:11px;color:var(--mt)">Grant HR admin access</div></div></div>
+        </div>
+      </div>
+      <!-- Role / avatar dropdown -->
+      <div class="av-rel" id="avRel">
+        <div class="av-pill" onclick="toggleAvDrop(event)">
+          <div class="avt" id="appAv">CE</div>
+          <span class="av-name" id="appName">Chinaza Eneh</span>
+          <span class="av-caret">▾</span>
+        </div>
+        <div class="nav-drop" id="navDrop">
+          <div class="nav-drop-item active-role"><span class="nav-drop-dot" style="background:var(--y)"></span>HR Admin</div>
+          <div class="nav-drop-divider"></div>
+          <div class="nav-drop-item" onclick="goOwnAppr()"><span class="nav-drop-dot" style="background:var(--bd)"></span>My Appraisal</div>
+        </div>
+      </div>
+    </div>
+    <!-- Own appraisal tabs — centred, only in appraisal mode -->
+    <div class="appr-tabs" id="apprTabs" style="display:none">
+      <button class="appr-tab on" id="tabAppr" onclick="switchApprTab('appr')">My Appraisal</button>
+      <button class="appr-tab" id="tabLog" onclick="switchApprTab('log')">My Logbook</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ STEPPER — own appraisal ════ -->
+<div id="apprStepperWrap" style="display:none">
+  <div class="stepper-bar"><div class="stepper-inner" id="apprStepperInner"></div></div>
+</div>
+
+<!-- ════ S0: LOGIN ════ -->
+<div class="scr on" id="s0">
+  <div class="login-shell">
+    <div class="login-tag">LOGIN — HR ADMIN</div>
+    <div class="login-panel">
+      <div class="card" id="cardA">
+        <h1>Appraisal Portal</h1>
+        <p class="card-sub">Sign in with your BCM work email and we'll send you a secure login link</p>
+        <div class="fld">
+          <label>Work Email <span>*</span></label>
+          <input type="email" id="emailInp" placeholder="chinaza@bigcabal.com" oninput="onEmailInput()" onkeydown="if(event.key==='Enter')doSend()"/>
+          <div class="err-txt" id="errTxt">Please enter a valid BCM email address.</div>
+        </div>
+        <button class="cta-btn cta-disabled" id="sendBtn" disabled onclick="doSend()">Send Login Link</button>
+        <div class="help-txt">Having trouble? Contact <a href="#">IT Support</a></div>
+      </div>
+      <div class="card" id="cardB" style="display:none">
+        <div class="email-icon-ring">
+          <svg width="22" height="18" viewBox="0 0 26 20" fill="none"><rect x="1" y="1" width="24" height="18" rx="3" stroke="#FCB900" stroke-width="1.8"/><path d="M1 4l12 8 12-8" stroke="#FCB900" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <h1 style="font-size:18px">Check your email</h1>
+        <p class="card-sub" style="margin-bottom:6px">We sent a secure link to</p>
+        <p style="font-weight:700;color:var(--tx);font-size:14px;margin-bottom:16px" id="sentEmail">—</p>
+        <div style="background:#FAFAFA;border:1px solid var(--bd);border-radius:8px;padding:11px 14px;font-size:12px;color:#999;line-height:1.65;text-align:left;margin-bottom:20px">Link expires in <strong style="color:var(--tx)">15 minutes</strong>. Check spam if needed.</div>
+        <button class="cta-btn cta-sending" id="ctaB" disabled><div class="spin"></div>Sending link →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S1: DASHBOARD ════ -->
+<div class="scr" id="s1">
+  <div class="wrap">
+    <div class="top-row">
+      <div class="top-left"><h1>H1 2026 Appraisal Dashboard</h1><p>January – June 2026 · 92 eligible employees · Deadline: 27 June 2026</p></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-s btn-sm" onclick="showTab('cycle')">+ New cycle</button><button class="btn btn-p btn-sm" onclick="showTab('export')">↓ Export broadsheet</button></div>
+    </div>
+
+    <!-- Pending HR Slot Confirmation -->
+    <div style="background:var(--w);border:1.5px solid #FDE68A;border-radius:10px;margin-bottom:20px;overflow:hidden">
+      <div style="padding:13px 18px;background:#FFFBEB;border-bottom:1px solid #FDE68A;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">📅</span><span style="font-size:13px;font-weight:700;color:#92400E">Pending slot confirmation</span><span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px">1 discussion to schedule</span></div>
+        <span style="font-size:12px;color:var(--mt)">Manager has proposed slots — select one to confirm and notify the employee</span>
+      </div>
+      <div style="padding:18px">
+        <!-- Employee + manager info row -->
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--bd)">
+          <div style="width:40px;height:40px;border-radius:50%;background:#0F6E56;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">ES</div>
+          <div style="flex:1">
+            <div style="font-size:14px;font-weight:600;color:var(--tx)">Esere Sobotie</div>
+            <div style="font-size:12px;color:var(--mt);margin-top:2px">Reviewed by Aderemi Oladele (Design Lead) · Submitted today · H1 2026</div>
+          </div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap">
+            <div style="text-align:center"><div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">KPI</div><div style="font-size:15px;font-weight:700;color:var(--tx)">88%</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">V&amp;B</div><div style="font-size:15px;font-weight:700;color:var(--tx)">85%</div></div>
+            <div style="text-align:center"><div style="font-size:10px;color:var(--mt);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">Recommendation</div><div style="font-size:13px;font-weight:700;color:var(--tx)">Good performance</div></div>
+          </div>
+        </div>
+        <!-- Proposed slots -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:10px">Aderemi's proposed slots</div>
+            <div style="display:flex;flex-direction:column;gap:8px" id="proposedSlotsHR">
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--bd);border-radius:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--ok)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--bd)'"><input type="radio" name="hrSlot" value="Wed, 13 May · 10:00 AM" onchange="hrSlotChanged(this)" style="accent-color:var(--ok)"/><div><div style="font-size:13px;font-weight:600;color:var(--tx)">Wed, 13 May · 10:00 AM</div><div style="font-size:11px;color:var(--mt)">Morning slot</div></div></label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--bd);border-radius:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--ok)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--bd)'"><input type="radio" name="hrSlot" value="Thu, 14 May · 2:00 PM" onchange="hrSlotChanged(this)" style="accent-color:var(--ok)"/><div><div style="font-size:13px;font-weight:600;color:var(--tx)">Thu, 14 May · 2:00 PM</div><div style="font-size:11px;color:var(--mt)">Afternoon slot</div></div></label>
+              <label style="display:flex;align-items:center;gap:10px;padding:10px 14px;border:1.5px solid var(--bd);border-radius:8px;cursor:pointer;transition:all .15s" onmouseover="this.style.borderColor='var(--ok)'" onmouseout="if(!this.querySelector('input').checked)this.style.borderColor='var(--bd)'"><input type="radio" name="hrSlot" value="Mon, 18 May · 11:00 AM" onchange="hrSlotChanged(this)" style="accent-color:var(--ok)"/><div><div style="font-size:13px;font-weight:600;color:var(--tx)">Mon, 18 May · 11:00 AM</div><div style="font-size:11px;color:var(--mt)">Morning slot</div></div></label>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:10px">Note from Aderemi</div>
+            <div style="background:#FAFAF8;border:1px solid var(--bd);border-radius:8px;padding:12px 14px;font-size:13px;color:var(--mt);line-height:1.6;font-style:italic;margin-bottom:16px">"Esere prefers afternoons where possible. Happy with any of the three slots — please avoid Fridays."</div>
+            <button id="hrConfirmBtn" onclick="hrConfirmSlot()" disabled style="width:100%;padding:12px;border-radius:8px;background:#E5E5E0;color:#aaa;border:none;font-size:13px;font-weight:700;cursor:not-allowed;font-family:var(--f);transition:all .2s">Select a slot to confirm</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat"><div class="stat-v">92</div><div class="stat-l">Total employees</div></div>
+      <div class="stat ok"><div class="stat-v">34</div><div class="stat-l">Complete</div></div>
+      <div class="stat amber"><div class="stat-v">41</div><div class="stat-l">In progress</div></div>
+      <div class="stat red"><div class="stat-v">12</div><div class="stat-l">Overdue</div></div>
+      <div class="stat"><div class="stat-v">5</div><div class="stat-l">Not started</div></div>
+    </div>
+    <div id="nudgeBar" style="display:none" class="nudge-bar">
+      <p id="nudgeCount">0 selected</p>
+      <div style="display:flex;gap:8px"><button class="btn btn-s btn-sm" onclick="clearSel()">Clear</button><button class="btn btn-p btn-sm" onclick="sendNudge()">Send reminder email</button></div>
+    </div>
+    <div class="filter-row">
+      <input class="srch" placeholder="Search by name or department…"/>
+      <select class="fsel"><option>All departments</option><option>Design</option><option>Growth</option><option>TC</option><option>Business Development</option><option>Product</option></select>
+      <select class="fsel"><option>All statuses</option><option>Complete</option><option>In Progress</option><option>Overdue</option><option>Not Started</option></select>
+      <select class="fsel"><option>All managers</option><option>Aderemi Oladele</option><option>Daniel Adeyemi</option><option>Gartrude Obi</option></select>
+    </div>
+    <div class="dtable">
+      <div class="dt-hdr"><div><input type="checkbox" class="chk" id="selAll" onchange="togAll(this)"/></div><div class="dth">Employee</div><div class="dth">Department</div><div class="dth">Manager</div><div class="dth">KPI Setup</div><div class="dth">Self-Review</div><div class="dth">Mgr Review</div><div class="dth">Discussion</div><div class="dth">Grade</div></div>
+      <div id="trows"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S2: CREATE CYCLE ════ -->
+<div class="scr" id="s2">
+  <div class="wrap">
+    <div style="margin-bottom:18px"><h1 style="font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px">Create appraisal cycle</h1><p style="font-size:13px;color:var(--mt);margin-top:3px">The system will automatically generate one record per eligible employee (6+ months tenure).</p></div>
+    <div class="form-sec">
+      <h3>Cycle details</h3>
+      <div class="field-row"><div class="field"><label>Cycle name</label><input value="H1 2026 Appraisal Cycle"/></div><div class="field"><label>Period</label><select><option>H1 (January – June)</option><option>H2 (July – December)</option></select></div></div>
+      <div class="field-row"><div class="field"><label>Start date</label><input type="date" value="2026-01-01"/></div><div class="field"><label>End date</label><input type="date" value="2026-06-30"/></div></div>
+    </div>
+    <div class="form-sec">
+      <h3>Phase deadlines <span style="font-size:11px;font-weight:400;color:var(--mt)">(optional)</span></h3>
+      <div class="phase-config">
+        <div class="pc-item"><label>KPI Setup</label><input type="date" placeholder="No deadline"/></div>
+        <div class="pc-item"><label>Self-Review</label><input type="date" value="2026-06-20"/></div>
+        <div class="pc-item"><label>Mgr Review</label><input type="date" value="2026-06-24"/></div>
+        <div class="pc-item"><label>Discussion</label><input type="date" value="2026-06-26"/></div>
+        <div class="pc-item"><label>Close</label><input type="date" value="2026-06-27"/></div>
+      </div>
+    </div>
+    <div class="form-sec"><h3>Eligibility</h3><p style="font-size:13px;color:var(--mt);margin-bottom:10px">Staff with less than 6 months tenure are automatically excluded.</p><div class="elig-info"><strong>92 employees eligible</strong> · 8 excluded (below 6-month tenure threshold)</div></div>
+    <div class="ff"><button class="btn btn-s" onclick="showTab('dash')">← Cancel</button><div class="fa"><button class="btn btn-s">Save as draft</button><button class="btn btn-ok" onclick="cycleLaunched()">Create cycle and notify all staff</button></div></div>
+  </div>
+</div>
+
+<!-- Cycle launched -->
+<div class="scr" id="s2c">
+  <div style="min-height:calc(100vh - 56px);display:flex;align-items:center;justify-content:center;padding:40px 20px">
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:12px;max-width:400px;width:100%;padding:40px 32px;text-align:center">
+      <div style="width:64px;height:64px;border-radius:50%;background:#F0FDF4;border:2px solid var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:28px">✓</div>
+      <h2 style="font-size:21px;font-weight:700;color:var(--tx);margin-bottom:8px">Cycle created</h2>
+      <p style="font-size:13px;color:var(--mt);line-height:1.65;margin-bottom:22px">92 appraisal records generated. Welcome emails queued for all eligible employees.</p>
+      <button class="btn btn-p btn-full" onclick="showTab('dash')">← Back to dashboard</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S3: BROADSHEET EXPORT ════ -->
+<div class="scr" id="s3">
+  <div class="wrap">
+    <div style="margin-bottom:18px"><h1 style="font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px">Broadsheet export</h1><p style="font-size:13px;color:var(--mt);margin-top:3px">Select an appraisal cycle then export the full record of scores, grades and recommendations.</p></div>
+
+    <!-- Cycle selector with search + filter -->
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:16px">
+      <div style="font-size:13px;font-weight:600;color:var(--tx);margin-bottom:14px">Select appraisal cycle</div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="position:relative;flex:1;min-width:200px">
+          <svg style="position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--mt)" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input id="cycleSearch" style="width:100%;padding:8px 12px 8px 34px;border:1.5px solid var(--bd);border-radius:7px;font-size:13px;color:var(--tx);outline:none;font-family:var(--f);background:var(--w)" placeholder="Search cycles e.g. H1 2026, Jan..." oninput="filterCycles()"/>
+        </div>
+        <select id="cycleHalf" style="border:1.5px solid var(--bd);border-radius:7px;padding:8px 13px;font-size:13px;color:var(--tx);outline:none;font-family:var(--f);background:var(--w);cursor:pointer" onchange="filterCycles()">
+          <option value="">All halves</option>
+          <option value="H1">H1 (Jan–Jun)</option>
+          <option value="H2">H2 (Jul–Dec)</option>
+        </select>
+        <select id="cycleYear" style="border:1.5px solid var(--bd);border-radius:7px;padding:8px 13px;font-size:13px;color:var(--tx);outline:none;font-family:var(--f);background:var(--w);cursor:pointer" onchange="filterCycles()">
+          <option value="">All years</option>
+          <option value="2026">2026</option>
+          <option value="2025">2025</option>
+          <option value="2024">2024</option>
+          <option value="2023">2023</option>
+        </select>
+      </div>
+      <!-- Cycle results list -->
+      <div id="cycleList" style="display:flex;flex-direction:column;gap:8px;max-height:260px;overflow-y:auto"></div>
+      <div id="cycleEmpty" style="display:none;text-align:center;padding:20px;font-size:13px;color:var(--mt)">No cycles match your search</div>
+    </div>
+
+    <!-- Export actions -->
+    <div style="display:flex;gap:10px;margin-bottom:16px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-p" id="xlsxBtn" onclick="exportFile('xlsx')">↓ Export as Excel (.xlsx)</button>
+      <button class="btn btn-s" id="csvBtn" onclick="exportFile('csv')">↓ Export as CSV</button>
+      <span style="font-size:12px;color:var(--mt);margin-left:4px" id="exportMeta">Showing H1 2026 · 92 employees · Last updated today</span>
+    </div>
+
+    <div class="bs-preview">
+      <div class="bs-hdr"><div class="bs-hdr-t" id="bsTitle">H1 2026 — Preview (first 8 rows)</div><span style="font-size:11px;color:var(--mt)" id="bsCount">92 employees total</span></div>
+      <div class="bs-table"><table>
+        <thead><tr><th>Name</th><th>Dept</th><th>Manager</th><th>V&amp;B (self)</th><th>KPI (self)</th><th>Avg (self)</th><th>V&amp;B (mgr)</th><th>KPI (mgr)</th><th>Avg (mgr)</th><th>Final grade</th><th>Recommendation</th><th>Status</th></tr></thead>
+        <tbody id="bsBody">
+          <tr><td>Esere Sobotie</td><td>Design</td><td>Aderemi Oladele</td><td>87%</td><td>94%</td><td>91%</td><td>88%</td><td>92%</td><td>90%</td><td><span class="gd gdA">A</span></td><td>Good performance</td><td><span class="sp sp-d">Complete</span></td></tr>
+          <tr><td>Mayomikun Eze</td><td>Design</td><td>Aderemi Oladele</td><td>90%</td><td>98%</td><td>94%</td><td>88%</td><td>96%</td><td>92%</td><td><span class="gd gdA">A</span></td><td>Outstanding</td><td><span class="sp sp-d">Complete</span></td></tr>
+          <tr><td>Aisha Idowu</td><td>Design</td><td>Aderemi Oladele</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="gd gdn">—</span></td><td>—</td><td><span class="sp sp-o">Self-Review Open</span></td></tr>
+          <tr><td>Asah Nworah</td><td>Growth</td><td>Daniel Adeyemi</td><td>78%</td><td>82%</td><td>80%</td><td>75%</td><td>79%</td><td>77%</td><td><span class="gd gdB">B</span></td><td>Very good</td><td><span class="sp sp-d">Complete</span></td></tr>
+          <tr><td>Gartrude Obi</td><td>Biz Dev</td><td>Mayomikun Adeyemi</td><td>85%</td><td>91%</td><td>88%</td><td>82%</td><td>88%</td><td>85%</td><td><span class="gd gdA">A</span></td><td>Bonus recommended</td><td><span class="sp sp-d">Complete</span></td></tr>
+          <tr><td>Eme Uchenna</td><td>TC</td><td>Olanrewaju Taiwo</td><td>62%</td><td>58%</td><td>60%</td><td>60%</td><td>55%</td><td>57%</td><td><span class="gd gdD">D</span></td><td>PIP recommended</td><td><span class="sp sp-d">Complete</span></td></tr>
+          <tr><td>Mariam Bello</td><td>Growth</td><td>Daniel Adeyemi</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="gd gdn">—</span></td><td>—</td><td><span class="sp sp-e">Overdue</span></td></tr>
+          <tr><td>Oluwaseun Adele</td><td>Design</td><td>Aderemi Oladele</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td><span class="gd gdn">—</span></td><td>—</td><td><span class="sp sp-p">KPI Pending</span></td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S5: MY APPRAISAL (HR own appraisal view) ════ -->
+<!-- ════ sAdash: OWN APPRAISAL DASHBOARD ════ -->
+<div class="scr" id="sAdash">
+  <div class="appr-wrap">
+    <div style="font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.4px;margin-bottom:14px">Good morning, <span id="adminFirst">Chinaza</span> 👋</div>
+    <div style="margin-bottom:20px">
+      <h2 style="font-size:17px;font-weight:700;color:var(--tx);margin-bottom:5px">Last Appraisal Recommendation</h2>
+      <p style="font-size:14px;color:var(--mt);line-height:1.6">Your H2 2025 appraisal recommendation from Emeka (Head of Operations): <span style="color:var(--tx);font-weight:400">Very good performance</span></p>
+    </div>
+    <!-- Countdown banner -->
+    <div style="background:#FFFBEB;border:1.5px solid #FFE082;border-radius:12px;padding:20px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div>
+        <div style="color:#A07820;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">H1 2026 Appraisal Cycle · Jan – Jun 2026</div>
+        <div style="color:var(--tx);font-size:16px;font-weight:500;margin-bottom:4px">Your self-review is open — complete before the deadline</div>
+        <div style="color:var(--mt);font-size:13px">Submission deadline: <strong style="color:#B45309">27 June 2026</strong></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;flex-shrink:0">
+        <div style="text-align:center"><div style="border:0.5px solid #FFD060;border-radius:8px;padding:10px 16px;min-width:60px"><div style="font-size:26px;font-weight:800;color:#1A1A18;line-height:1" id="aCdDays">46</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#A07820;margin-top:3px">days</div></div></div>
+        <div style="font-size:20px;color:#C9A84C;font-weight:300">:</div>
+        <div style="text-align:center"><div style="border:0.5px solid #FFD060;border-radius:8px;padding:10px 16px;min-width:60px"><div style="font-size:26px;font-weight:800;color:#1A1A18;line-height:1" id="aCdHours">14</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#A07820;margin-top:3px">hours</div></div></div>
+        <div style="font-size:20px;color:#C9A84C;font-weight:300">:</div>
+        <div style="text-align:center"><div style="border:0.5px solid #FFD060;border-radius:8px;padding:10px 16px;min-width:60px"><div style="font-size:26px;font-weight:800;color:#1A1A18;line-height:1" id="aCdMins">32</div><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#A07820;margin-top:3px">mins</div></div></div>
+      </div>
+    </div>
+    <!-- Cycle card -->
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:20px">
+      <div style="background:#ECECEC;padding:16px 22px;display:flex;justify-content:space-between;align-items:center">
+        <div><div style="color:var(--tx);font-size:15px;font-weight:600">H1 2026 Appraisal Cycle</div><div style="color:#B8860B;font-size:12px;margin-top:2px">January – June 2026</div></div>
+        <div style="text-align:right"><div style="color:var(--mt);font-size:11px">Deadline</div><div style="color:var(--tx);font-size:13px;font-weight:600;margin-top:2px">27 Jun 2026</div></div>
+      </div>
+      <div style="padding:18px 22px">
+        <div style="background:rgba(255,248,225,0.25);border:1px solid rgba(255,224,130,0.25);border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px">
+          <div><div style="font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px">Your self-review is ready</div><div style="font-size:12px;color:#7B5800">Emeka (Head of Operations) has set your KPIs. Start with the Document Guide.</div></div>
+          <button class="btn btn-p btn-sm" onclick="aGoStep(1)">Open self-review →</button>
+        </div>
+      </div>
+    </div>
+    <!-- Previous cycles -->
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--mt);margin-bottom:10px">Previous Cycles</div>
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div><div style="font-size:13px;font-weight:500;color:var(--tx)">H2 2025 Appraisal Cycle</div><div style="font-size:11px;color:var(--mt);margin-top:2px">July – December 2025 · Completed 18 Dec 2025</div></div>
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:28px;height:28px;border-radius:6px;background:#EFF6FF;color:#2563EB;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">B</div><span style="font-size:12px;color:var(--mt);cursor:pointer">View →</span></div>
+    </div>
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div><div style="font-size:13px;font-weight:500;color:var(--tx)">H1 2025 Appraisal Cycle</div><div style="font-size:11px;color:var(--mt);margin-top:2px">January – June 2025 · Completed 2 Jul 2025</div></div>
+      <div style="display:flex;align-items:center;gap:10px"><div style="width:28px;height:28px;border-radius:6px;background:#F0FDF4;color:var(--ok);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center">A</div><span style="font-size:12px;color:var(--mt);cursor:pointer">View →</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAdoc: DOCUMENT GUIDE ════ -->
+<div class="scr" id="sAdoc">
+  <div class="appr-wrap">
+    <div style="display:inline-flex;background:var(--dark);color:#fff;border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin-bottom:16px">Document Guide</div>
+    <p style="font-size:14px;color:var(--mt);line-height:1.7;margin-bottom:8px">This appraisal document is designed to increase the fairness in our appraisal process. It is expected that every team lead sets KPIs for their team members at the beginning of every appraisal cycle.</p>
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📊</div>
+        <div><div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Section 1 — KPI Review</div><p style="font-size:13px;color:var(--mt);line-height:1.7">KPIs per objective should be between 2–4. Functional objectives are related to your departmental objectives. Weights denote level of importance — total must equal 100%. <strong style="color:var(--tx)">Deliverable KPIs</strong> use a completion level (Fully / Largely / Partially / Not Delivered) instead of a numerical target.</p></div>
+      </div>
+    </div>
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px;margin-bottom:14px">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--y);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">😊</div>
+        <div><div style="font-size:14px;font-weight:700;color:var(--tx);margin-bottom:6px">Section 2 — Values & Behaviours</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-top:8px">
+            <div style="font-size:13px;color:var(--mt)">● Punching above their weight</div><div style="font-size:13px;color:var(--mt)">● Treat others well</div>
+            <div style="font-size:13px;color:var(--mt)">● Solving the hard problems</div><div style="font-size:13px;color:var(--mt)">● Ability to work in a team</div>
+            <div style="font-size:13px;color:var(--mt)">● Delivering high quality work</div><div style="font-size:13px;color:var(--mt)">● Never stop learning</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="appr-ff">
+      <button class="btn btn-s" onclick="goOwnAppr()">← Back</button>
+      <button class="btn btn-p" onclick="aGoStep(2)">Key Performance Indicator →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAkpi: KPI ════ -->
+<div class="scr" id="sAkpi">
+  <div class="appr-wrap">
+    <div style="display:inline-flex;background:var(--y);color:var(--dark);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin-bottom:12px">Key Performance Indicator</div>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:18px;line-height:1.6">Enter your actual result for each KPI. Achievement %, weighted score and grade update automatically.</p>
+    <!-- Accordion formula -->
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--mt)">📐 <strong style="color:var(--tx)">Formula:</strong> (Actual ÷ Target) × Weight = Weighted score · Grade: A >90% · B 80–90% · C 60–79% · D &lt;60%</div>
+    <!-- Objective 1 -->
+    <div class="obj-card">
+      <div class="obj-hdr">
+        <span class="obj-label">Objective 1</span>
+        <span class="obj-title">Manage HR operations and people processes effectively</span>
+        <span class="obj-wt-pill">Total weight: 70%</span>
+      </div>
+      <div class="kpi-hdr" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kh">KPI</div><div class="kh" style="text-align:center">Weight</div><div class="kh" style="text-align:center">Target</div><div class="kh" style="text-align:center">Actual</div><div class="kh" style="text-align:center">Achieved</div><div class="kh" style="text-align:center">Grade</div></div>
+      <div class="kpi-row" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kn">Onboarding completion rate</div><div class="kw">30%</div><div class="kt">100%</div><div class="ki"><input type="number" id="ak0" placeholder="—" oninput="aKCalc(0,100,30)"/></div><div class="kpct" id="akp0">—</div><div style="text-align:center"><span class="gtag gN" id="akg0">—</span></div></div>
+      <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context about this KPI…"></textarea></div>
+      <div class="kpi-row" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kn">Policy compliance rate across departments</div><div class="kw">25%</div><div class="kt">95%</div><div class="ki"><input type="number" id="ak1" placeholder="—" oninput="aKCalc(1,95,25)"/></div><div class="kpct" id="akp1">—</div><div style="text-align:center"><span class="gtag gN" id="akg1">—</span></div></div>
+      <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context about this KPI…"></textarea></div>
+      <div class="kpi-row last" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kn">Average time-to-hire (days)</div><div class="kw">15%</div><div class="kt">21</div><div class="ki"><input type="number" id="ak2" placeholder="—" oninput="aKCalc(2,21,15)"/></div><div class="kpct" id="akp2">—</div><div style="text-align:center"><span class="gtag gN" id="akg2">—</span></div></div>
+      <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context about this KPI…"></textarea></div>
+    </div>
+    <!-- Objective 2 -->
+    <div class="obj-card">
+      <div class="obj-hdr">
+        <span class="obj-label">Objective 2</span>
+        <span class="obj-title">Drive employee engagement and appraisal cycle completion</span>
+        <span class="obj-wt-pill">Total weight: 30%</span>
+      </div>
+      <div class="kpi-hdr" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kh">KPI</div><div class="kh" style="text-align:center">Weight</div><div class="kh" style="text-align:center">Target</div><div class="kh" style="text-align:center">Actual</div><div class="kh" style="text-align:center">Achieved</div><div class="kh" style="text-align:center">Grade</div></div>
+      <div class="kpi-row" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kn">Appraisal cycle completion rate</div><div class="kw">20%</div><div class="kt">100%</div><div class="ki"><input type="number" id="ak3" placeholder="—" oninput="aKCalc(3,100,20)"/></div><div class="kpct" id="akp3">—</div><div style="text-align:center"><span class="gtag gN" id="akg3">—</span></div></div>
+      <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context about this KPI…"></textarea></div>
+      <div class="kpi-row last" style="grid-template-columns:1fr 68px 80px 80px 72px 62px"><div class="kn">Employee satisfaction survey score</div><div class="kw">10%</div><div class="kt">4.0</div><div class="ki"><input type="number" id="ak4" step="0.1" placeholder="—" oninput="aKCalc(4,4.0,10)"/></div><div class="kpct" id="akp4">—</div><div style="text-align:center"><span class="gtag gN" id="akg4">—</span></div></div>
+      <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context about this KPI…"></textarea></div>
+    </div>
+    <!-- Objective 3 — Deliverable -->
+    <div class="obj-card">
+      <div class="obj-hdr">
+        <span class="obj-label">Objective 3</span>
+        <span class="obj-title">Facilitate stronger adherence to brand systems across the business</span>
+        <span class="obj-wt-pill">Total weight: 33%</span>
+      </div>
+      <div style="padding:9px 18px;background:#EFF6FF;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;font-weight:700;color:#1D4ED8">📋 Deliverable KPIs</span>
+        <span style="font-size:11px;color:#3B82F6">Describe your achievement then select a completion level. Grade calculates automatically.</span>
+      </div>
+      <!-- Del KPI 1 -->
+      <div class="del-kpi-row">
+        <div class="del-kpi-hdr"><div><div class="kn">Deliver Responsive Case Study page for BCM</div><span class="del-type-badge">Deliverable</span></div><div style="display:flex;align-items:center;gap:12px;flex-shrink:0"><div class="kw">15%</div><span class="gtag gN" id="akg5">—</span></div></div>
+        <div class="del-kpi-body"><div class="del-kpi-target"><div class="del-field-lbl">Target</div><div class="del-target-txt">Timely delivery of a fully responsive Case Study page for BCM's website</div></div><div class="del-kpi-actual"><div class="del-field-lbl">Your achievement <span style="color:var(--er)">*</span></div><textarea class="del-actual-ta" placeholder="Describe what you delivered…"></textarea></div></div>
+        <div class="del-kpi-footer"><div style="font-size:12px;font-weight:600;color:var(--tx);white-space:nowrap">Completion level</div><div class="del-sel-wrap"><select class="del-completion-sel" id="adc5" onchange="aDelDropCalc(5,15,this)"><option value="" disabled selected>Select completion level…</option><option value="100">Fully Delivered — 100%</option><option value="80">Largely Delivered — 80%</option><option value="60">Partially Delivered — 60%</option><option value="0">Not Delivered — 0%</option></select><div class="del-sel-caret">▼</div></div><div style="font-size:12px;color:var(--mt);font-weight:600" id="akp5">—</div></div>
+        <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context or evidence…"></textarea></div>
+      </div>
+      <!-- Del KPI 2 -->
+      <div class="del-kpi-row">
+        <div class="del-kpi-hdr"><div><div class="kn">Deliver Client Projects that arise</div><span class="del-type-badge">Deliverable</span></div><div style="display:flex;align-items:center;gap:12px;flex-shrink:0"><div class="kw">10%</div><span class="gtag gN" id="akg6">—</span></div></div>
+        <div class="del-kpi-body"><div class="del-kpi-target"><div class="del-field-lbl">Target</div><div class="del-target-txt">Timely delivery of all client projects that arise during the cycle</div></div><div class="del-kpi-actual"><div class="del-field-lbl">Your achievement <span style="color:var(--er)">*</span></div><textarea class="del-actual-ta" placeholder="List client projects delivered…"></textarea></div></div>
+        <div class="del-kpi-footer"><div style="font-size:12px;font-weight:600;color:var(--tx);white-space:nowrap">Completion level</div><div class="del-sel-wrap"><select class="del-completion-sel" id="adc6" onchange="aDelDropCalc(6,10,this)"><option value="" disabled selected>Select completion level…</option><option value="100">Fully Delivered — 100%</option><option value="80">Largely Delivered — 80%</option><option value="60">Partially Delivered — 60%</option><option value="0">Not Delivered — 0%</option></select><div class="del-sel-caret">▼</div></div><div style="font-size:12px;color:var(--mt);font-weight:600" id="akp6">—</div></div>
+        <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context or evidence…"></textarea></div>
+      </div>
+      <!-- Del KPI 3 -->
+      <div class="del-kpi-row">
+        <div class="del-kpi-hdr"><div><div class="kn">Deliver Updates to Z! Memes</div><span class="del-type-badge">Deliverable</span></div><div style="display:flex;align-items:center;gap:12px;flex-shrink:0"><div class="kw">8%</div><span class="gtag gN" id="akg7">—</span></div></div>
+        <div class="del-kpi-body"><div class="del-kpi-target"><div class="del-field-lbl">Target</div><div class="del-target-txt">Timely delivery of all scheduled Z! Memes updates during the cycle</div></div><div class="del-kpi-actual"><div class="del-field-lbl">Your achievement <span style="color:var(--er)">*</span></div><textarea class="del-actual-ta" placeholder="Describe Z! Memes updates delivered…"></textarea></div></div>
+        <div class="del-kpi-footer"><div style="font-size:12px;font-weight:600;color:var(--tx);white-space:nowrap">Completion level</div><div class="del-sel-wrap"><select class="del-completion-sel" id="adc7" onchange="aDelDropCalc(7,8,this)"><option value="" disabled selected>Select completion level…</option><option value="100">Fully Delivered — 100%</option><option value="80">Largely Delivered — 80%</option><option value="60">Partially Delivered — 60%</option><option value="0">Not Delivered — 0%</option></select><div class="del-sel-caret">▼</div></div><div style="font-size:12px;color:var(--mt);font-weight:600" id="akp7">—</div></div>
+        <div class="kpi-cmt"><label>Comment (optional)</label><textarea placeholder="Add context or evidence…"></textarea></div>
+      </div>
+    </div>
+    <!-- KPI Footer score -->
+    <div style="display:flex;align-items:center;gap:12px;margin-top:4px;padding:14px 0">
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:10px 18px;display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--mt);font-weight:600">KPI score</span><span style="font-size:18px;font-weight:700;color:var(--tx)" id="aKpiTotal">—</span></div>
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:10px 18px;display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--mt);font-weight:600">Grade</span><span class="gtag gN" id="aKpiGrade">—</span></div>
+    </div>
+    <div class="appr-ff">
+      <button class="btn btn-s" onclick="aGoStep(1)">← Back</button>
+      <button class="btn btn-p" onclick="aGoStep(3)">Values &amp; Behaviour →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAvb: VALUES & BEHAVIOUR ════ -->
+<div class="scr" id="sAvb">
+  <div class="appr-wrap">
+    <div style="display:inline-flex;background:var(--y);color:var(--dark);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin-bottom:12px">Values &amp; Behaviour</div>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:18px">Rate yourself on each of BCM's six core behaviours. Comments are optional.</p>
+    <div id="aVbList"></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:10px 18px;display:flex;align-items:center;gap:10px"><span style="font-size:12px;color:var(--mt);font-weight:600">V&amp;B score</span><span style="font-size:18px;font-weight:700;color:var(--tx)" id="aVbTotal">—</span></div>
+    </div>
+    <div class="appr-ff">
+      <button class="btn btn-s" onclick="aGoStep(2)">← Back</button>
+      <button class="btn btn-p" onclick="aGoStep(4)">Learning &amp; Development →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAlrn: LEARNING & DEVELOPMENT ════ -->
+<div class="scr" id="sAlrn">
+  <div class="appr-wrap">
+    <div style="display:inline-flex;background:var(--y);color:var(--dark);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin-bottom:12px">Learning &amp; Development</div>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:18px">Log any courses, training or development activities from this cycle.</p>
+    <div class="obj-card">
+      <div class="lrn-hdr"><div class="kh">Course / Activity</div><div class="kh">Platform / Provider</div><div class="kh">Business Application</div><div></div></div>
+      <div id="aLrnList"></div>
+    </div>
+    <button onclick="aAddLrn()" style="border:none;background:none;cursor:pointer;font-size:13px;color:var(--y);font-weight:600;padding:10px 0;font-family:var(--f)">+ Add learning activity</button>
+    <div class="appr-ff">
+      <button class="btn btn-s" onclick="aGoStep(3)">← Back</button>
+      <button class="btn btn-p" onclick="aGoStep(5)">Appraisal Summary →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAsum: APPRAISAL SUMMARY ════ -->
+<div class="scr" id="sAsum">
+  <div class="appr-wrap">
+    <div style="display:inline-flex;background:var(--y);color:var(--dark);border-radius:20px;padding:4px 14px;font-size:12px;font-weight:700;margin-bottom:12px">Appraisal Summary</div>
+    <p style="font-size:13px;color:var(--mt);margin-bottom:18px;line-height:1.6">Review your self-scores before submitting. You cannot make changes after submission.</p>
+    <div style="background:#FFFBEB;border:1px solid #FFE082;border-radius:8px;padding:12px 16px;margin-bottom:18px;font-size:13px;color:#7B5800">📋 Your scores are shown below. Your final grade will only be calculated after your manager completes their review.</div>
+    <table class="sum-table" style="margin-bottom:16px">
+      <thead><tr><th>Section</th><th>Your score</th><th>Manager score</th></tr></thead>
+      <tbody>
+        <tr><td>Values &amp; Behaviours</td><td id="aSumVb" style="font-weight:600">—</td><td style="color:var(--mt)">Pending</td></tr>
+        <tr><td>Key Performance Indicators</td><td id="aSumKpi" style="font-weight:600">—</td><td style="color:var(--mt)">Pending</td></tr>
+        <tr><td style="font-weight:700">Average score</td><td id="aSumAvg" style="font-weight:700;font-size:15px">—</td><td style="color:var(--mt)">Pending</td></tr>
+      </tbody>
+    </table>
+    <div style="background:#F5F5F2;border:1.5px dashed var(--bd);border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px;color:var(--mt)">🔒 Final grade — available after manager review and discussion phase are complete</div>
+    <div class="appr-ff">
+      <button class="btn btn-s" onclick="aGoStep(4)">← Back</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s">Save draft</button>
+        <button class="btn btn-ok" onclick="aOpenSubmitModal()">Submit self-review</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAconf: SUBMISSION CONFIRMATION ════ -->
+<div class="scr" id="sAconf">
+  <div style="display:flex;align-items:center;justify-content:center;min-height:70vh;padding:24px">
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:14px;padding:36px 32px;max-width:480px;width:100%;text-align:center">
+      <div style="width:64px;height:64px;border-radius:50%;background:#F0FDF4;border:2px solid var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px">✓</div>
+      <h2 style="font-size:20px;font-weight:700;color:var(--tx);margin-bottom:10px">Self-review submitted</h2>
+      <p style="font-size:14px;color:var(--mt);line-height:1.7;margin-bottom:24px">Your H1 2026 self-review has been submitted. Emeka will be notified to begin their manager review. You'll be notified once it's complete.</p>
+      <div style="background:#FAFAF8;border:1px solid var(--bd);border-radius:8px;padding:14px 18px;text-align:left;margin-bottom:20px">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="font-size:12px;color:var(--mt)">Cycle</span><span style="font-size:12px;font-weight:600;color:var(--tx)">H1 2026 Appraisal</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd)"><span style="font-size:12px;color:var(--mt)">KPI self-score</span><span style="font-size:12px;font-weight:600;color:var(--tx)" id="aConfKpi">—</span></div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0"><span style="font-size:12px;color:var(--mt)">V&amp;B self-score</span><span style="font-size:12px;font-weight:600;color:var(--tx)" id="aConfVb">—</span></div>
+      </div>
+      <button class="btn btn-p" style="width:100%" onclick="goOwnAppr()">← Back to My Appraisal</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ sAlog: MY LOGBOOK ════ -->
+<div class="scr" id="sAlog">
+  <div class="appr-wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px">
+      <div><h1 style="font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.4px">My Logbook</h1><p style="font-size:13px;color:var(--mt);margin-top:3px">Track your work, wins, learning and observations throughout the year.</p></div>
+      <button class="btn btn-p" onclick="openAdminEntry()">+ New entry</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px">
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--tx)">3</div><div style="font-size:11px;color:var(--mt);margin-top:2px">Work logs</div></div>
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--ok)">2</div><div style="font-size:11px;color:var(--mt);margin-top:2px">Wins</div></div>
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;text-align:center"><div style="font-size:22px;font-weight:700;color:#D97706">2</div><div style="font-size:11px;color:var(--mt);margin-top:2px">Learning</div></div>
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:8px;padding:12px 16px;text-align:center"><div style="font-size:22px;font-weight:700;color:#7E22CE">3</div><div style="font-size:11px;color:var(--mt);margin-top:2px">Team notes</div></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <input style="flex:1;border:1.5px solid var(--bd);border-radius:7px;padding:7px 12px;font-size:12px;color:var(--tx);background:var(--w);outline:none;font-family:var(--f)" placeholder="Search entries…"/>
+      <select style="border:1.5px solid var(--bd);border-radius:7px;padding:7px 12px;font-size:12px;color:var(--tx);background:var(--w);outline:none;font-family:var(--f);cursor:pointer"><option>All types</option><option>Work Log</option><option>Win</option><option>Learning</option><option>Team Note</option></select>
+    </div>
+    <div class="lb-entry"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px"><div><div style="font-size:14px;font-weight:600;color:var(--tx)">H1 2026 appraisal cycle launched on time</div><div style="font-size:11px;color:var(--mt);margin-top:2px">2 Jan 2026</div></div><span class="lb-type-pill lb-win">🏆 Win</span></div><div style="font-size:13px;color:var(--mt);line-height:1.6">Coordinated full cycle rollout — all 92 employees notified and KPIs set within the first week of January.</div></div>
+    <div class="lb-entry"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px"><div><div style="font-size:14px;font-weight:600;color:var(--tx)">Completed HRBP certification</div><div style="font-size:11px;color:var(--mt);margin-top:2px">15 Mar 2026</div></div><span class="lb-type-pill lb-learn">📚 Learning</span></div><div style="font-size:13px;color:var(--mt);line-height:1.6">Completed the HRBP professional certification — applying frameworks directly to the appraisal process redesign.</div></div>
+    <div class="lb-entry"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px"><div><div style="font-size:14px;font-weight:600;color:var(--tx)">Aderemi shows strong coaching instinct</div><div style="font-size:11px;color:var(--mt);margin-top:2px">22 Apr 2026</div></div><span class="lb-type-pill lb-team">🔒 Team Note</span></div><div style="font-size:13px;color:var(--mt);line-height:1.6">Aderemi's team consistently delivers to brief. His 1:1 approach clearly developing junior designers. Potential for broader design leadership role.</div><div style="font-size:11px;color:var(--er);margin-top:8px;font-weight:600">🔒 Private — not visible to Aderemi</div></div>
+  </div>
+</div>
+
+<!-- Submit warning modal -->
+<div id="aSubmitModal" class="modal-overlay hidden">
+  <div class="warn-modal">
+    <div style="font-size:36px;margin-bottom:16px">⚠️</div>
+    <h2 style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:10px">Ready to submit?</h2>
+    <p style="font-size:13px;color:var(--mt);line-height:1.7;margin-bottom:16px">Once submitted, you cannot make any changes. Your manager will be notified to begin their review. Any unanswered KPI will be scored as zero.</p>
+    <div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:7px;padding:10px 14px;font-size:12px;color:var(--er);margin-bottom:20px">Please review all sections carefully before confirming.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-s" style="flex:1" onclick="document.getElementById('aSubmitModal').classList.add('hidden')">Go back and review</button>
+      <button class="btn btn-ok" style="flex:1" onclick="aSubmitReview()">Yes, submit now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logbook entry modal -->
+<div id="adminEntryModal" class="modal-overlay hidden">
+  <div class="entry-modal">
+    <div class="entry-modal-hdr"><h2>New logbook entry</h2><button class="modal-close" onclick="document.getElementById('adminEntryModal').classList.add('hidden')">×</button></div>
+    <div class="entry-modal-body">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);margin-bottom:8px">Entry type</div>
+      <div class="entry-type-tabs" style="grid-template-columns:repeat(4,1fr)">
+        <div class="et-tab on" id="aetWork" onclick="setAdminEntryType('Work Log')"><span class="et-icon">📋</span><span class="et-lbl">Work Log</span></div>
+        <div class="et-tab" id="aetWin" onclick="setAdminEntryType('Win')"><span class="et-icon">🏆</span><span class="et-lbl">Win</span></div>
+        <div class="et-tab" id="aetLearn" onclick="setAdminEntryType('Learning')"><span class="et-icon">📚</span><span class="et-lbl">Learning</span></div>
+        <div class="et-tab" id="aetTeam" onclick="setAdminEntryType('Team Note')"><span class="et-icon">🔒</span><span class="et-lbl">Team Note</span></div>
+      </div>
+      <div id="adminTeamInfo" style="display:none;background:#F3E8FF;border:1px solid #D8B4FE;border-radius:7px;padding:10px 13px;font-size:12px;color:#7E22CE;margin-bottom:14px">🔒 Team Notes are private. They are never visible to the employee.</div>
+      <div class="ef"><label>Title <span style="color:var(--er)">*</span></label><input id="aefTitle" placeholder="e.g. Completed HRBP certification"/></div>
+      <div class="ef"><label>Date</label><input type="date" id="aefDate"/></div>
+      <div class="ef"><label>Notes</label><textarea id="aefDesc" style="width:100%;border:1.5px solid var(--bd);border-radius:7px;padding:9px 13px;font-size:13px;resize:none;height:80px;outline:none;font-family:var(--f)" placeholder="What happened, what you achieved, or what you observed…"></textarea></div>
+    </div>
+    <div class="entry-modal-footer"><button class="btn btn-s" onclick="document.getElementById('adminEntryModal').classList.add('hidden')">Cancel</button><button class="btn btn-p" onclick="document.getElementById('adminEntryModal').classList.add('hidden')">Save entry</button></div>
+  </div>
+</div>
+
+<!-- ════ S6: EMPLOYEE DETAIL ════ -->
+<div class="scr" id="s6">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+      <button class="btn btn-s btn-sm" onclick="showTab('dash')">← Dashboard</button>
+      <span style="font-size:12px;color:var(--mt)">Employee profile</span>
+    </div>
+    <!-- Profile header -->
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:12px;padding:24px;margin-bottom:16px;display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div id="empAvatar" style="width:64px;height:64px;border-radius:50%;background:#0F6E56;color:#fff;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">ES</div>
+      <div style="flex:1">
+        <div style="font-size:22px;font-weight:700;color:var(--tx);letter-spacing:-.4px" id="empName">Esere Sobotie</div>
+        <div style="font-size:14px;color:var(--mt);margin-top:4px" id="empRole">Social Media Manager · Design</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <div style="background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--tx)" id="empGrade">A</div><div style="font-size:10px;color:var(--mt)">Current grade</div></div>
+        <div style="background:var(--bg);border:1px solid var(--bd);border-radius:8px;padding:10px 16px;text-align:center"><div style="font-size:18px;font-weight:700;color:var(--tx)" id="empCycles">3</div><div style="font-size:10px;color:var(--mt)">Cycles completed</div></div>
+      </div>
+    </div>
+    <!-- Detail grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
+      <!-- Personal details -->
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bd)">Personal details</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)">Email</div><div style="font-size:13px;color:var(--tx);margin-top:3px" id="empEmail">esere@bigcabal.com</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)">Department</div><div style="font-size:13px;color:var(--tx);margin-top:3px" id="empDept">Design</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)">Manager</div><div style="font-size:13px;color:var(--tx);margin-top:3px" id="empMgr">Aderemi Oladele</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)">Start date</div><div style="font-size:13px;color:var(--tx);margin-top:3px" id="empStart">March 2023</div></div>
+          <div><div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt)">Access level</div><div style="font-size:13px;color:var(--tx);margin-top:3px" id="empAccess"><span class="admin-badge admin-no">Employee</span></div></div>
+        </div>
+      </div>
+      <!-- Current cycle -->
+      <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;padding:20px">
+        <div style="font-size:13px;font-weight:700;color:var(--tx);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bd)">H1 2026 — Current cycle</div>
+        <div id="empCurrentCycle" style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--tx)">KPI Setup</span><span class="sp sp-d">Done</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--tx)">Self-Review</span><span class="sp sp-d">Done</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--tx)">Manager Review</span><span class="sp sp-d">Done</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--tx)">Discussion</span><span class="sp sp-o">Pending</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;color:var(--tx)">Close</span><span class="sp sp-p">Pending</span></div>
+          <div style="border-top:1px solid var(--bd);padding-top:10px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--tx)">Final grade</span><span class="gd gdA" id="empFinalGrade">A</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:13px;font-weight:600;color:var(--tx)">Recommendation</span><span style="font-size:13px;color:var(--tx)" id="empRec">Good performance</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Previous cycles -->
+    <div style="background:var(--w);border:1px solid var(--bd);border-radius:10px;overflow:hidden">
+      <div style="padding:14px 20px;border-bottom:1px solid var(--bd);font-size:13px;font-weight:700;color:var(--tx)">Previous appraisal cycles</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:#FAFAF8"><th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">Cycle</th><th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">Duration</th><th style="padding:10px 20px;text-align:center;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">KPI</th><th style="padding:10px 20px;text-align:center;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">V&amp;B</th><th style="padding:10px 20px;text-align:center;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">Grade</th><th style="padding:10px 20px;text-align:left;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--bd)">Recommendation</th></tr></thead>
+        <tbody id="empHistory">
+          <tr><td style="padding:12px 20px;border-bottom:1px solid var(--bd)">H2 2025</td><td style="padding:12px 20px;border-bottom:1px solid var(--bd);color:var(--mt)">Jul – Dec 2025</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)">88%</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)">82%</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)"><span class="gd gdB">B</span></td><td style="padding:12px 20px;border-bottom:1px solid var(--bd);color:var(--mt)">Good performance</td></tr>
+          <tr><td style="padding:12px 20px;border-bottom:1px solid var(--bd)">H1 2025</td><td style="padding:12px 20px;border-bottom:1px solid var(--bd);color:var(--mt)">Jan – Jun 2025</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)">91%</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)">90%</td><td style="padding:12px 20px;text-align:center;border-bottom:1px solid var(--bd)"><span class="gd gdA">A</span></td><td style="padding:12px 20px;border-bottom:1px solid var(--bd);color:var(--mt)">Bonus recommended</td></tr>
+          <tr><td style="padding:12px 20px">H2 2024</td><td style="padding:12px 20px;color:var(--mt)">Jul – Dec 2024</td><td style="padding:12px 20px;text-align:center">78%</td><td style="padding:12px 20px;text-align:center">75%</td><td style="padding:12px 20px;text-align:center"><span class="gd gdB">B</span></td><td style="padding:12px 20px;color:var(--mt)">Very good performance</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ════ S4: NOTIFICATIONS ════ -->
+<div class="scr" id="s4">
+  <div class="wrap">
+    <div style="margin-bottom:18px"><h1 style="font-size:20px;font-weight:700;color:var(--tx);letter-spacing:-.4px">Notifications</h1><p style="font-size:13px;color:var(--mt);margin-top:3px">All 10 email triggers for the H1 2026 cycle.</p></div>
+    <div class="notif-card">
+      <div class="notif-row"><div><div class="notif-title">Cycle opens — all employees &amp; managers</div><div class="notif-sub">Explains the cycle, what to expect, and deadlines.</div></div><span class="notif-badge nb-auto">Sent automatically</span></div>
+      <div class="notif-row"><div><div class="notif-title">Manager KPI deadline –24 hrs</div><div class="notif-sub">Only fires if a deadline is set and the manager is overdue.</div></div><span class="notif-badge nb-auto">Auto on deadline</span></div>
+      <div class="notif-row"><div><div class="notif-title">Manager submits KPI setup → Employee notified</div><div class="notif-sub">Self-review is now open.</div></div><span class="notif-badge nb-auto">Sent automatically</span></div>
+      <div class="notif-row"><div><div class="notif-title">Self-review deadline –24 hrs</div><div class="notif-sub">Only fires if a deadline is set and the employee is overdue.</div></div><span class="notif-badge nb-auto">Auto on deadline</span></div>
+      <div class="notif-row"><div><div class="notif-title">Employee submits self-review → Manager notified</div><div class="notif-sub">Manager review is now open.</div></div><span class="notif-badge nb-auto">Sent automatically</span></div>
+      <div class="notif-row"><div><div class="notif-title">Manager review deadline –24 hrs</div><div class="notif-sub">Only fires if a deadline is set and the manager is overdue.</div></div><span class="notif-badge nb-auto">Auto on deadline</span></div>
+      <div class="notif-row"><div><div class="notif-title">Manager submits review → Employee &amp; HR notified</div><div class="notif-sub">Discussion to be scheduled.</div></div><span class="notif-badge nb-auto">Sent automatically</span></div>
+      <div class="notif-row"><div><div class="notif-title">HR marks discussion as held → Manager notified</div><div class="notif-sub">Confirmation for the manager's records.</div></div><span class="notif-badge nb-man">Manual trigger</span></div>
+      <div class="notif-row"><div><div class="notif-title">HR sets outcome &amp; closes record → Employee notified</div><div class="notif-sub">"Your appraisal is ready to view."</div></div><span class="notif-badge nb-man">Manual trigger</span></div>
+      <div class="notif-row"><div><div class="notif-title">Employee acknowledges → Manager &amp; HR notified</div><div class="notif-sub">Record is now complete.</div></div><span class="notif-badge nb-auto">Sent automatically</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ IMPORT MODAL ════ -->
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <div class="modal-hdr"><h2>Import Employee Data</h2><button class="modal-close" onclick="closeImport()">×</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--mt);margin-bottom:16px">Upload a CSV or Excel file to bulk-onboard employees. Download the template to see the required format.</p>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+        <div class="upload-icon">📁</div>
+        <div class="upload-title">Click to browse or drag &amp; drop</div>
+        <div class="upload-sub">CSV or Excel (.xlsx) files only</div>
+        <input type="file" id="fileInput" accept=".csv,.xlsx" style="display:none" onchange="handleFile(this)"/>
+      </div>
+      <div class="upload-hint">
+        <strong>Required columns:</strong> Full Name, Email, Department, Job Title, Manager Email, Start Date<br>
+        <strong>Optional:</strong> Phone, Is Admin (yes/no)
+      </div>
+      <div style="margin-top:12px">
+        <button class="btn btn-s" style="width:100%;font-size:12px" onclick="alert('Downloading employee_import_template.xlsx')">↓ Download template</button>
+      </div>
+      <div id="uploadStatus" style="display:none;margin-top:12px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:7px;padding:10px 14px;font-size:13px;color:var(--ok)"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-s" onclick="closeImport()">Cancel</button><button class="btn btn-ok" onclick="processImport()">Import employees</button></div>
+  </div>
+</div>
+
+<!-- ════ ONBOARD MODAL ════ -->
+<div class="modal-overlay" id="onboardModal">
+  <div class="modal">
+    <div class="modal-hdr"><h2 id="onboardTitle">Add Employee</h2><button class="modal-close" onclick="closeOnboard()">×</button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>First name <span class="req">*</span></label><input placeholder="e.g. Esere"/></div>
+        <div class="field"><label>Last name <span class="req">*</span></label><input placeholder="e.g. Sobotie"/></div>
+      </div>
+      <div class="field"><label>Work email <span class="req">*</span></label><input type="email" placeholder="esere@bigcabal.com"/></div>
+      <div class="field-row">
+        <div class="field"><label>Department <span class="req">*</span></label>
+          <select><option value="" disabled selected>Select department</option><option>Design</option><option>Growth</option><option>Technology &amp; Content</option><option>Business Development</option><option>Product</option><option>Finance</option><option>Operations</option></select>
+        </div>
+        <div class="field"><label>Job title <span class="req">*</span></label><input placeholder="e.g. Social Media Manager"/></div>
+      </div>
+      <div class="field"><label>Manager <span class="req">*</span></label>
+        <select><option value="" disabled selected>Select manager</option><option>Aderemi Oladele (Design Lead)</option><option>Daniel Adeyemi (Growth Lead)</option><option>Gartrude Obi (Biz Dev Lead)</option><option>Olanrewaju Taiwo (TC Lead)</option><option>Chinwe Okafor (Head of Design)</option></select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Start date <span class="req">*</span></label><input type="date"/></div>
+        <div class="field"><label>Phone number</label><input type="tel" placeholder="+234 800 000 0000"/></div>
+      </div>
+      <!-- Admin toggle -->
+      <div style="background:#FAFAF8;border:1px solid var(--bd);border-radius:8px;padding:14px 16px;margin-top:4px">
+        <div class="toggle-row" style="border:none;padding:0">
+          <div><div class="toggle-lbl" style="font-size:13px;font-weight:600">Grant HR Admin access</div><div class="toggle-sub">This person can manage cycles, export broadsheets and onboard employees</div></div>
+          <label class="toggle" style="margin-left:16px"><input type="checkbox" id="isAdminToggle" onchange="toggleAdminNote()"/><span class="toggle-slider"></span></label>
+        </div>
+        <div id="adminNote" style="display:none;margin-top:10px;font-size:12px;color:#7B5800;background:var(--yl);border-radius:6px;padding:8px 10px">⚠️ Admin users can view all employee data and manage appraisal cycles.</div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-s" onclick="closeOnboard()">Cancel</button><button class="btn btn-ok" onclick="submitOnboard()">Add member</button></div>
+  </div>
+</div>
+
+<!-- Onboard success -->
+<div class="modal-overlay" id="onboardSuccess">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-body" style="text-align:center;padding:36px 24px">
+      <div style="width:56px;height:56px;border-radius:50%;background:#F0FDF4;border:2px solid var(--ok);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:24px">✓</div>
+      <h2 style="font-size:18px;font-weight:700;color:var(--tx);margin-bottom:8px" id="successMsg">Member added</h2>
+      <p style="font-size:13px;color:var(--mt);margin-bottom:20px">A welcome email with login instructions has been sent.</p>
+      <button class="btn btn-p btn-full" onclick="closeSuccess()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── LOGIN ──
+function onEmailInput(){const v=document.getElementById('emailInp').value;const btn=document.getElementById('sendBtn');const ok=v.includes('@');btn.disabled=!ok;btn.className='cta-btn '+(ok?'cta-ready':'cta-disabled');document.getElementById('errTxt').classList.remove('on');document.getElementById('emailInp').classList.remove('err');}
+function doSend(){const inp=document.getElementById('emailInp'),v=inp.value.trim();if(!v||!v.includes('@')||!v.includes('.')){document.getElementById('errTxt').classList.add('on');inp.classList.add('err');return;}document.getElementById('sentEmail').textContent=v;document.getElementById('cardA').style.display='none';document.getElementById('cardB').style.display='block';setTimeout(()=>{const btn=document.getElementById('ctaB');btn.disabled=false;btn.className='cta-btn cta-open';btn.innerHTML='Open Email App';btn.onclick=enterApp;},1400);}
+function enterApp(){document.getElementById('s0').classList.remove('on');document.getElementById('loginHdr').style.display='none';document.getElementById('appHdr').style.display='block';document.getElementById('s1').classList.add('on');window.scrollTo(0,0);}
+
+// ── NAV ──
+function showTab(tab){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('apprStepperWrap').style.display='none';
+  document.getElementById('apprTabs').style.display='none';
+  document.getElementById('hrNav').style.display='flex';
+  const map={dash:'s1',cycle:'s2',export:'s3',notif:'s4'};
+  const scr=map[tab]||'s1';
+  document.getElementById(scr).classList.add('on');
+  ['dash','cycle','export','notif'].forEach(t=>{
+    const el=document.getElementById('ht-'+t);
+    if(el) el.className='hdr-tab'+(t===tab?' on':'');
+  });
+  document.getElementById('navDrop').classList.remove('open');
+  document.getElementById('addDrop').classList.remove('open');
+  window.scrollTo(0,0);
+}
+
+// ── OWN APPRAISAL FLOW ──
+const aSteps=[
+  {label:'KPI Setup',screen:null},
+  {label:'Document\nGuide',screen:'sAdoc'},
+  {label:'Key\nPerformance\nIndicator',screen:'sAkpi'},
+  {label:'Values &\nBehaviour',screen:'sAvb'},
+  {label:'Learning &\nDevelopment',screen:'sAlrn'},
+  {label:'Manager\nReview',screen:null,locked:true},
+  {label:'Appraisal\nSummary',screen:'sAsum'}
+];
+const aSt={kpi:new Array(8).fill(0),vb:{}};
+
+function goOwnAppr(){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sAdash').classList.add('on');
+  document.getElementById('apprStepperWrap').style.display='none';
+  document.getElementById('hrNav').style.display='none';
+  document.getElementById('apprTabs').style.display='flex';
+  document.getElementById('tabAppr').className='appr-tab on';
+  document.getElementById('tabLog').className='appr-tab';
+  document.getElementById('navDrop').classList.remove('open');
+  updateAdminCountdown();
+  window.scrollTo(0,0);
+}
+
+function switchApprTab(tab){
+  document.getElementById('tabAppr').className='appr-tab'+(tab==='appr'?' on':'');
+  document.getElementById('tabLog').className='appr-tab'+(tab==='log'?' on':'');
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('apprStepperWrap').style.display='none';
+  document.getElementById(tab==='log'?'sAlog':'sAdash').classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function aGoStep(idx){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  const s=aSteps[idx];
+  if(!s||s.locked) return;
+  const scr=s.screen||'sAdash';
+  document.getElementById(scr).classList.add('on');
+  document.getElementById('apprStepperWrap').style.display='block';
+  document.getElementById('apprTabs').style.display='flex';
+  document.getElementById('tabAppr').className='appr-tab on';
+  document.getElementById('tabLog').className='appr-tab';
+  buildAdminStepper(idx);
+  if(scr==='sAsum') aUpdSummary();
+  window.scrollTo(0,0);
+}
+
+function buildAdminStepper(activeIdx){
+  const c=document.getElementById('apprStepperInner'); c.innerHTML='';
+  aSteps.forEach((s,i)=>{
+    const div=document.createElement('div');
+    let cls='step';
+    if(i===activeIdx) cls+=' active';
+    else if(s.locked) cls+=' locked';
+    div.className=cls;
+    const dot=s.locked?'🔒':String(i+1);
+    div.innerHTML='<div class="step-dot">'+dot+'</div><div class="step-lbl">'+s.label.replace(/\n/g,'<br>')+'</div>';
+    if(!s.locked&&s.screen&&i!==activeIdx) div.addEventListener('click',()=>aGoStep(i));
+    c.appendChild(div);
+  });
+}
+
+// KPI scoring
+function aKCalc(i,tgt,wt){
+  const v=parseFloat(document.getElementById('ak'+i).value);
+  const pp=document.getElementById('akp'+i), gp=document.getElementById('akg'+i);
+  if(isNaN(v)){pp.textContent='—';pp.className='kpct';gp.textContent='—';gp.className='gtag gN';aSt.kpi[i]=0;aUpdKpiTotal();return;}
+  const p=Math.min(100,(v/tgt)*100);
+  aSt.kpi[i]=p*(wt/100);
+  pp.textContent=Math.round(p)+'%';pp.className='kpct v';
+  const g=p>90?'A':p>=80?'B':p>=60?'C':'D';
+  gp.textContent=g;gp.className='gtag g'+g;
+  aUpdKpiTotal();
+}
+
+function aDelDropCalc(i,wt,sel){
+  const score=parseInt(sel.value);
+  if(isNaN(score)) return;
+  aSt.kpi[i]=score*(wt/100);
+  const g=score>=100?'A':score>=80?'B':score>=60?'C':'D';
+  const gp=document.getElementById('akg'+i), pp=document.getElementById('akp'+i);
+  if(gp){gp.textContent=g;gp.className='gtag g'+g;}
+  if(pp){pp.textContent=score+'%';}
+  sel.style.borderColor='var(--y)';
+  aUpdKpiTotal();
+}
+
+function aUpdKpiTotal(){
+  const t=Math.round(aSt.kpi.reduce((a,b)=>a+b,0));
+  const el=document.getElementById('aKpiTotal'), ge=document.getElementById('aKpiGrade');
+  if(el) el.textContent=t>0?t+'%':'—';
+  if(ge){const g=t>90?'A':t>=80?'B':t>=60?'C':'D';ge.textContent=t>0?g:'—';ge.className='gtag '+(t>0?'g'+g:'gN');}
+}
+
+// V&B
+const aVbDefs=[
+  {n:'Punching above your weight',d:'You go above and beyond to do the hard work every day.'},
+  {n:'Solving the hard problems',d:"You aren't shy to tackle hard problems or take on difficult tasks."},
+  {n:'Deliver high quality work consistently',d:'You have an excellent command of your deliverables and are impeccable in delivering great work.'},
+  {n:'Treat others well',d:'You are polite and courteous in relating with all team members.'},
+  {n:'Ability to work in a team',d:'You collaborate well with people within and outside the team.'},
+  {n:'Never stop learning',d:'You show ability to remain flexible, continually improve and seek personal growth.'}
+];
+const aRats=[{l:'Needs\nImprov.',s:25},{l:'Average',s:50},{l:'Effective',s:75},{l:'Strong',s:90},{l:'Outstanding',s:100}];
+
+function buildAdminVB(){
+  const c=document.getElementById('aVbList'); if(!c) return;
+  let html='';
+  aVbDefs.forEach((b,i)=>{
+    let btns='';
+    aRats.forEach((r,j)=>{
+      btns+='<button class="r-btn" id="avb'+i+'_'+j+'" onclick="selAdminVB('+i+','+j+','+r.s+')"><span class="r-lbl">'+r.l.replace('\n','<br>')+'</span><span class="r-sc">'+r.s+'</span></button>';
+    });
+    html+='<div class="vb-card"><div class="vb-top"><div><div class="vb-name">'+b.n+'</div><div class="vb-desc">'+b.d+'</div></div><span class="vb-pill vbp-n" id="avbp'+i+'">Not yet rated</span></div><div class="r-row">'+btns+'</div><div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--bd)"><label style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mt);display:block;margin-bottom:5px">Your comment (optional)</label><textarea style="width:100%;border:1.5px solid var(--bd);border-radius:6px;padding:8px 11px;font-size:12px;resize:none;height:52px;outline:none;font-family:var(--f);color:var(--tx)" placeholder="Add context or evidence for this rating…" onfocus="this.style.borderColor=\'var(--y)\'" onblur="this.style.borderColor=\'var(--bd)\'"></textarea></div></div>';
+  });
+  c.innerHTML=html;
+}
+
+function selAdminVB(bi,ri,sc){
+  aSt.vb[bi]=sc;
+  aRats.forEach((_,j)=>{const b=document.getElementById('avb'+bi+'_'+j);if(b)b.classList.toggle('sel',j===ri);});
+  const p=document.getElementById('avbp'+bi);
+  const pills=['vbp-1','vbp-2','vbp-3','vbp-4','vbp-5'];
+  if(p){p.textContent=aRats[ri].l.replace('\n',' ');p.className='vb-pill '+(pills[ri]||'vbp-3');}
+  const vals=Object.values(aSt.vb);
+  const avg=vals.length?Math.round(vals.reduce((a,b)=>a+b,0)/6):0;
+  const el=document.getElementById('aVbTotal');
+  if(el) el.textContent=avg>0?avg+'%':'—';
+}
+
+// Learning
+function aAddLrn(){
+  const list=document.getElementById('aLrnList'); if(!list) return;
+  const r=document.createElement('div');r.className='lrn-row';
+  r.innerHTML='<input class="lrn-inp" placeholder="e.g. HRBP Certification"/><input class="lrn-inp" placeholder="e.g. CIPM"/><input class="lrn-inp" placeholder="e.g. Improved policy framework"/><button class="lrn-rm" onclick="this.closest(\'.lrn-row\').remove()">×</button>';
+  list.appendChild(r);
+}
+
+// Summary
+function aUpdSummary(){
+  const kpi=Math.round(aSt.kpi.reduce((a,b)=>a+b,0));
+  const vbVals=Object.values(aSt.vb);
+  const vb=vbVals.length?Math.round(vbVals.reduce((a,b)=>a+b,0)/6):0;
+  const avg=kpi&&vb?Math.round((kpi+vb)/2):kpi||vb;
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('aSumKpi',kpi?kpi+'%':'—');s('aSumVb',vb?vb+'%':'—');s('aSumAvg',avg?avg+'%':'—');
+  aSt._kpi=kpi;aSt._vb=vb;
+}
+
+function aOpenSubmitModal(){
+  aUpdSummary();
+  document.getElementById('aSubmitModal').classList.remove('hidden');
+}
+
+function aSubmitReview(){
+  document.getElementById('aSubmitModal').classList.add('hidden');
+  const k=aSt._kpi||0, v=aSt._vb||0;
+  const s=(id,val)=>{const e=document.getElementById(id);if(e)e.textContent=val;};
+  s('aConfKpi',k?k+'%':'—');s('aConfVb',v?v+'%':'—');
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('sAconf').classList.add('on');
+  document.getElementById('apprStepperWrap').style.display='none';
+  window.scrollTo(0,0);
+}
+
+// Logbook modal
+function openAdminEntry(){
+  const d=new Date().toISOString().split('T')[0];
+  const df=document.getElementById('aefDate');if(df)df.value=d;
+  const tf=document.getElementById('aefTitle');if(tf)tf.value='';
+  const nf=document.getElementById('aefDesc');if(nf)nf.value='';
+  setAdminEntryType('Work Log');
+  document.getElementById('adminEntryModal').classList.remove('hidden');
+}
+function setAdminEntryType(type){
+  ['Work Log','Win','Learning','Team Note'].forEach((t,i)=>{
+    const ids=['aetWork','aetWin','aetLearn','aetTeam'];
+    const el=document.getElementById(ids[i]);if(el)el.className='et-tab'+(type===t?' on':'');
+  });
+  const ti=document.getElementById('adminTeamInfo');
+  if(ti)ti.style.display=type==='Team Note'?'block':'none';
+}
+
+// Countdown
+function updateAdminCountdown(){
+  const deadline=new Date('2026-06-27T23:59:59'),now=new Date(),diff=deadline-now;
+  if(diff<=0)return;
+  const d=Math.floor(diff/(1000*60*60*24)),h=Math.floor((diff%(1000*60*60*24))/(1000*60*60)),m=Math.floor((diff%(1000*60*60))/(1000*60));
+  const s=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  s('aCdDays',d);s('aCdHours',h);s('aCdMins',String(m).padStart(2,'0'));
+}
+setInterval(updateAdminCountdown,30000);
+function cycleLaunched(){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById('s2c').classList.add('on');window.scrollTo(0,0);}
+
+// ── DROPDOWNS ──
+function toggleAvDrop(e){e.stopPropagation();document.getElementById('addDrop').classList.remove('open');document.getElementById('navDrop').classList.toggle('open');}
+function toggleAddDrop(e){e.stopPropagation();document.getElementById('navDrop').classList.remove('open');document.getElementById('addDrop').classList.toggle('open');}
+document.addEventListener('click',()=>{document.getElementById('navDrop').classList.remove('open');document.getElementById('addDrop').classList.remove('open');});
+
+// ── CYCLE SELECTOR ──
+const allCycles = [
+  {name:'H1 2026', half:'H1', year:'2026', dur:'January – June 2026',   count:'92 employees', status:'Active'},
+  {name:'H2 2025', half:'H2', year:'2025', dur:'July – December 2025',  count:'89 employees', status:'Closed'},
+  {name:'H1 2025', half:'H1', year:'2025', dur:'January – June 2025',   count:'85 employees', status:'Closed'},
+  {name:'H2 2024', half:'H2', year:'2024', dur:'July – December 2024',  count:'82 employees', status:'Closed'},
+  {name:'H1 2024', half:'H1', year:'2024', dur:'January – June 2024',   count:'79 employees', status:'Closed'},
+  {name:'H2 2023', half:'H2', year:'2023', dur:'July – December 2023',  count:'74 employees', status:'Closed'},
+  {name:'H1 2023', half:'H1', year:'2023', dur:'January – June 2023',   count:'68 employees', status:'Closed'},
+];
+let selectedCycle = allCycles[0];
+
+function filterCycles() {
+  const q = (document.getElementById('cycleSearch').value || '').toLowerCase();
+  const half = document.getElementById('cycleHalf').value;
+  const year = document.getElementById('cycleYear').value;
+  const filtered = allCycles.filter(c =>
+    (!q || c.name.toLowerCase().includes(q) || c.dur.toLowerCase().includes(q)) &&
+    (!half || c.half === half) &&
+    (!year || c.year === year)
+  );
+  const list = document.getElementById('cycleList');
+  const empty = document.getElementById('cycleEmpty');
+  list.innerHTML = '';
+  if (filtered.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  filtered.forEach(c => {
+    const isActive = c.name === selectedCycle.name;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:8px;cursor:pointer;border:1.5px solid ' + (isActive ? 'var(--dark)' : 'var(--bd)') + ';background:' + (isActive ? 'var(--dark)' : 'var(--w)') + ';transition:all .15s';
+    row.onmouseover = function() { if (c.name !== selectedCycle.name) { this.style.borderColor='var(--y)'; this.style.background='var(--yl)'; }};
+    row.onmouseout = function() { if (c.name !== selectedCycle.name) { this.style.borderColor='var(--bd)'; this.style.background='var(--w)'; }};
+    const statusCol = c.status === 'Active'
+      ? '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#F0FDF4;color:var(--ok)">Active</span>'
+      : '<span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;background:#F5F5F0;color:var(--mt)">Closed</span>';
+    const tickCol = isActive ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FCB900" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+    row.innerHTML =
+      '<div style="display:flex;align-items:center;gap:14px">' +
+        '<div style="width:40px;height:40px;border-radius:8px;background:' + (isActive ? 'rgba(252,185,0,.15)' : '#F5F5F2') + ';display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:' + (isActive ? 'var(--y)' : 'var(--mt)') + '">' + c.half + '</div>' +
+        '<div><div style="font-size:14px;font-weight:700;color:' + (isActive ? '#fff' : 'var(--tx)') + '">' + c.name + '</div>' +
+        '<div style="font-size:12px;color:' + (isActive ? 'rgba(255,255,255,.55)' : 'var(--mt)') + ';margin-top:2px">' + c.dur + ' · ' + c.count + '</div></div>' +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:10px">' + statusCol + tickCol + '</div>';
+    row.onclick = () => pickCycle(c);
+    list.appendChild(row);
+  });
+}
+
+function pickCycle(c) {
+  selectedCycle = c;
+  document.getElementById('bsTitle').textContent = c.name + ' — Preview (first 8 rows)';
+  document.getElementById('bsCount').textContent = c.count;
+  document.getElementById('exportMeta').textContent = 'Showing ' + c.name + ' · ' + c.count + ' · Last updated today';
+  filterCycles(); // re-render to update selection highlight
+}
+
+function exportFile(type) {
+  const slug = selectedCycle.name.toLowerCase().replace(' ', '_');
+  alert('Downloading broadsheet_' + slug + '.' + type + '…');
+}
+
+filterCycles(); // initial render
+
+// ── IMPORT ──
+function openImport(){document.getElementById('importModal').classList.add('open');}
+function closeImport(){document.getElementById('importModal').classList.remove('open');document.getElementById('uploadStatus').style.display='none';}
+function handleFile(inp){if(inp.files.length){const s=document.getElementById('uploadStatus');s.style.display='block';s.textContent='✓ '+inp.files[0].name+' ready to import ('+Math.round(inp.files[0].size/1024)+'KB)';}}
+function handleDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('drag');const f=e.dataTransfer.files[0];if(f){const s=document.getElementById('uploadStatus');s.style.display='block';s.textContent='✓ '+f.name+' ready to import';}}
+function processImport(){alert('Import complete. Employee records created and welcome emails queued.');closeImport();}
+
+// ── ONBOARD ──
+function openOnboard(type){document.getElementById('onboardTitle').textContent=type==='admin'?'Add HR Admin':'Add Employee';document.getElementById('isAdminToggle').checked=type==='admin';document.getElementById('adminNote').style.display=type==='admin'?'block':'none';document.getElementById('addDrop').classList.remove('open');document.getElementById('onboardModal').classList.add('open');}
+function closeOnboard(){document.getElementById('onboardModal').classList.remove('open');}
+function toggleAdminNote(){document.getElementById('adminNote').style.display=document.getElementById('isAdminToggle').checked?'block':'none';}
+function submitOnboard(){const isAdmin=document.getElementById('isAdminToggle').checked;document.getElementById('successMsg').textContent=isAdmin?'Admin member added':'Employee added';document.getElementById('onboardModal').classList.remove('open');document.getElementById('onboardSuccess').classList.add('open');}
+function closeSuccess(){document.getElementById('onboardSuccess').classList.remove('open');}
+
+// ── TABLE DATA ──
+const data=[
+  {n:"Esere Sobotie",d:"Design",m:"Aderemi Oladele",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-d",g:"A",s:"Complete"},
+  {n:"Aisha Idowu",d:"Design",m:"Aderemi Oladele",p1:"sp-d",p2:"sp-o",p3:"sp-p",p4:"sp-p",g:"",s:"Self-Review Open"},
+  {n:"Mayomikun Eze",d:"Design",m:"Aderemi Oladele",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-d",g:"A",s:"Complete"},
+  {n:"Oluwaseun Adele",d:"Design",m:"Aderemi Oladele",p1:"sp-p",p2:"sp-p",p3:"sp-p",p4:"sp-p",g:"",s:"Not Started"},
+  {n:"Asah Nworah",d:"Growth",m:"Daniel Adeyemi",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-d",g:"B",s:"Complete"},
+  {n:"Daniel Adeyemi",d:"Growth",m:"Chinwe Okafor",p1:"sp-d",p2:"sp-d",p3:"sp-o",p4:"sp-p",g:"",s:"Mgr Review Pending"},
+  {n:"Mariam Bello",d:"Growth",m:"Daniel Adeyemi",p1:"sp-d",p2:"sp-e",p3:"sp-p",p4:"sp-p",g:"",s:"Overdue"},
+  {n:"Eme Uchenna",d:"TC",m:"Olanrewaju Taiwo",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-d",g:"D",s:"Complete"},
+  {n:"Gartrude Obi",d:"Biz Dev",m:"Mayomikun Adeyemi",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-d",g:"A",s:"Complete"},
+  {n:"Olanrewaju Taiwo",d:"TC",m:"Chinwe Okafor",p1:"sp-d",p2:"sp-d",p3:"sp-d",p4:"sp-o",g:"",s:"Discussion Pending"},
+];
+const gCls={A:"gdA",B:"gdB",C:"gdC",D:"gdD","":"gdn"};
+function spLabel(c){return c==='sp-d'?'Done':c==='sp-o'?'Open':c==='sp-e'?'Overdue':'Pending';}
+let sel=new Set();
+const empDetails = {
+  "Esere Sobotie":    {initials:"ES",color:"#0F6E56",role:"Social Media Manager",dept:"Design",email:"esere@bigcabal.com",mgr:"Aderemi Oladele",start:"March 2023",admin:false,grade:"A",rec:"Good performance"},
+  "Aisha Idowu":      {initials:"AI",color:"#7C3AED",role:"Content Associate",dept:"Design",email:"aisha@bigcabal.com",mgr:"Aderemi Oladele",start:"June 2024",admin:false,grade:"—",rec:"In progress"},
+  "Mayomikun Eze":    {initials:"ME",color:"#C2410C",role:"Junior Designer",dept:"Design",email:"mayomikun@bigcabal.com",mgr:"Aderemi Oladele",start:"January 2024",admin:false,grade:"A",rec:"Outstanding"},
+  "Oluwaseun Adele":  {initials:"OA",color:"#1D4ED8",role:"Brand Designer",dept:"Design",email:"oluwaseun@bigcabal.com",mgr:"Aderemi Oladele",start:"August 2023",admin:false,grade:"—",rec:"Not started"},
+  "Asah Nworah":      {initials:"AN",color:"#0F6E56",role:"Growth Associate",dept:"Growth",email:"asah@bigcabal.com",mgr:"Daniel Adeyemi",start:"May 2023",admin:false,grade:"B",rec:"Very good performance"},
+  "Daniel Adeyemi":   {initials:"DA",color:"#7C3AED",role:"Growth Lead",dept:"Growth",email:"daniel@bigcabal.com",mgr:"Chinwe Okafor",start:"February 2022",admin:false,grade:"—",rec:"In progress"},
+  "Mariam Bello":     {initials:"MB",color:"#0F6E56",role:"Growth Associate",dept:"Growth",email:"mariam@bigcabal.com",mgr:"Daniel Adeyemi",start:"September 2023",admin:false,grade:"—",rec:"Overdue"},
+  "Eme Uchenna":      {initials:"EU",color:"#C2410C",role:"TC Specialist",dept:"TC",email:"eme@bigcabal.com",mgr:"Olanrewaju Taiwo",start:"October 2022",admin:false,grade:"D",rec:"PIP recommended"},
+  "Gartrude Obi":     {initials:"GO",color:"#1D4ED8",role:"Biz Dev Manager",dept:"Biz Dev",email:"gartrude@bigcabal.com",mgr:"Mayomikun Adeyemi",start:"April 2022",admin:false,grade:"A",rec:"Bonus recommended"},
+  "Olanrewaju Taiwo": {initials:"OT",color:"#0F6E56",role:"TC Lead",dept:"TC",email:"olanrewaju@bigcabal.com",mgr:"Chinwe Okafor",start:"January 2022",admin:false,grade:"—",rec:"Discussion pending"},
+};
+
+function openEmpDetail(name) {
+  const d = empDetails[name];
+  if (!d) return;
+  document.getElementById('empAvatar').textContent = d.initials;
+  document.getElementById('empAvatar').style.background = d.color;
+  document.getElementById('empName').textContent = name;
+  document.getElementById('empRole').textContent = d.role + ' · ' + d.dept;
+  document.getElementById('empEmail').textContent = d.email;
+  document.getElementById('empDept').textContent = d.dept;
+  document.getElementById('empMgr').textContent = d.mgr;
+  document.getElementById('empStart').textContent = d.start;
+  document.getElementById('empAccess').innerHTML = d.admin ? '<span class="admin-badge admin-yes">HR Admin</span>' : '<span class="admin-badge admin-no">Employee</span>';
+  document.getElementById('empGrade').textContent = d.grade;
+  document.getElementById('empRec').textContent = d.rec;
+  const gc = {A:'gdA',B:'gdB',C:'gdC',D:'gdD','—':'gdn'};
+  document.getElementById('empFinalGrade').className = 'gd ' + (gc[d.grade]||'gdn');
+  document.getElementById('empFinalGrade').textContent = d.grade;
+  document.getElementById('empCycles').textContent = d.grade !== '—' ? '3' : '2';
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s6').classList.add('on');
+  window.scrollTo(0,0);
+}
+
+function render(){const c=document.getElementById('trows');c.innerHTML='';data.forEach((e,i)=>{const r=document.createElement('div');r.className='dt-row'+(sel.has(i)?' sel':'');r.style.cursor='pointer';const gs=e.g?'<span class="gd '+gCls[e.g]+'">'+e.g+'</span>':'<span class="gd gdn">—</span>';const ss=e.s==='Complete'?'<span class="sp sp-d">'+e.s+'</span>':e.s.includes('Overdue')?'<span class="sp sp-e">'+e.s+'</span>':e.s==='Not Started'?'<span class="sp sp-p">'+e.s+'</span>':'<span class="sp sp-o">'+e.s+'</span>';r.innerHTML='<div><input type="checkbox" class="chk" '+(sel.has(i)?'checked':'')+' onchange="togRow('+i+',this)" onclick="event.stopPropagation()"/></div><div><div class="emp-name">'+e.n+'</div><div class="emp-dept">'+e.d+'</div></div><div class="emp-mgr">'+e.d+'</div><div class="emp-mgr">'+e.m+'</div><div><span class="sp '+e.p1+'">'+spLabel(e.p1)+'</span></div><div><span class="sp '+e.p2+'">'+spLabel(e.p2)+'</span></div><div><span class="sp '+e.p3+'">'+spLabel(e.p3)+'</span></div><div><span class="sp '+e.p4+'">'+spLabel(e.p4)+'</span></div><div>'+gs+'</div>';r.addEventListener('click',function(ev){if(ev.target.type!=='checkbox')openEmpDetail(e.n);});c.appendChild(r);});}
+function togRow(i,cb){if(cb.checked)sel.add(i);else sel.delete(i);updNudge();render();}
+function togAll(cb){data.forEach((_,i)=>cb.checked?sel.add(i):sel.delete(i));updNudge();render();}
+function updNudge(){const nb=document.getElementById('nudgeBar'),nc=document.getElementById('nudgeCount');if(sel.size>0){nb.style.display='flex';nc.textContent=sel.size+' employee'+(sel.size>1?'s':'')+' selected';}else nb.style.display='none';}
+function clearSel(){sel.clear();document.getElementById('selAll').checked=false;updNudge();render();}
+function sendNudge(){alert('Reminder sent to '+sel.size+' employee'+(sel.size>1?'s':'')+'.'); clearSel();}
+var confirmedHRSlot=null;
+function hrSlotChanged(radio){confirmedHRSlot=radio.value;document.querySelectorAll('#proposedSlotsHR label').forEach(function(l){l.style.borderColor=l.querySelector('input').checked?'var(--ok)':'var(--bd)';l.style.background=l.querySelector('input').checked?'#F0FDF4':'var(--w)';});var btn=document.getElementById('hrConfirmBtn');btn.disabled=false;btn.style.background='var(--ok)';btn.style.color='#fff';btn.style.cursor='pointer';btn.textContent='✓ Confirm '+confirmedHRSlot+' & notify Esere';}
+function hrConfirmSlot(){if(!confirmedHRSlot)return;if(confirm('Confirm "'+confirmedHRSlot+'" as the discussion slot?\n\nEsere will receive her appraisal results and a calendar invite for this time.')){alert('Done. Esere Sobotie has been notified:\n\n"Your H1 2026 appraisal results are ready. Your discussion call with Aderemi Oladele and HR is confirmed for '+confirmedHRSlot+'."');}}
+function hrApprove(){}
+function hrReject(){}
+
+// ── INIT ──
+buildAdminVB();
+aAddLrn();
+updateAdminCountdown();
+render();
+</script>
+</body>
+</html>
